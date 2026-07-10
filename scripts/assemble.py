@@ -185,7 +185,7 @@ def _check_reserved_sections(mods):
                   % (first_mid, first_sec)))
 
 
-def assemble(board_dir, modules_lock, size="M", height_budget=None):
+def assemble(board_dir, modules_lock, size="M", height_budget=None, skin_name="Deskdash"):
     """装配整张皮肤 .ini。
 
     参数:
@@ -193,6 +193,8 @@ def assemble(board_dir, modules_lock, size="M", height_budget=None):
       modules_lock  list[str],模块 id 的自上而下顺序。
       size          "S"|"M"|"L",档位(字号 + 间距 + 留白)。
       height_budget int 或 None;给定且总高超预算 → 抛 AssembleError(含各模块高度与可裁模块)。
+      skin_name     皮肤名,写进 modules.lock.json 供 deploy_skin.ps1 / uninstall.ps1 缺省读取
+                    (两脚本不传 -SkinName 时从这里取,取不到才落到自身默认 "Deskdash")。
 
     返回 {"ini_text": <完整 .ini>, "height": <int 总高>, "lock": <回写的顺序 list>}。
     副作用:把 modules.lock.json 写到 board_dir。
@@ -250,6 +252,7 @@ def assemble(board_dir, modules_lock, size="M", height_budget=None):
     lock = {
         "version": 1,
         "generated_by": "scripts/assemble.py",
+        "skin_name": skin_name,     # deploy_skin.ps1 / uninstall.ps1 不传 -SkinName 时读这里
         "size": size,
         "height": total_h,
         "modules": list(modules_lock),
@@ -283,15 +286,22 @@ def main(argv=None):
     ap.add_argument("--budget", type=int, default=None, help="高度预算(超则报错并给可裁模块)")
     ap.add_argument("--modules", default=None, help="逗号分隔的模块顺序(覆盖 lock/扫描)")
     ap.add_argument("--out", default=None, help="输出 .ini 路径(缺省打印到 stdout)")
+    ap.add_argument("--skin-name", default=None,
+                    help="皮肤名(写进 modules.lock.json 供部署脚本缺省读取);"
+                         "缺省由 --out 的文件名推断,再缺省 Deskdash")
     args = ap.parse_args(argv)
 
     board_dir = os.path.abspath(args.board)
     if not os.path.isdir(board_dir):
         print("板目录不存在:%s" % board_dir, file=sys.stderr)
         return 2
+    # 皮肤名:显式 > --out 文件名(deploy 默认找 <Board>\<SkinName>.ini,故两者须同名)> 默认
+    skin_name = args.skin_name or (
+        os.path.splitext(os.path.basename(args.out))[0] if args.out else "Deskdash")
     order = _resolve_order(board_dir, args.modules)
     try:
-        res = assemble(board_dir, order, size=args.size, height_budget=args.budget)
+        res = assemble(board_dir, order, size=args.size, height_budget=args.budget,
+                       skin_name=skin_name)
     except (AssembleError, ContractError) as e:
         print(json.dumps(e.to_error() if isinstance(e, AssembleError)
                          else {"ok": False, "err": {"kind": "bug", "retryable": False,

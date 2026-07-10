@@ -32,6 +32,7 @@
 git clone https://github.com/sandypoli-boop/sansheng-deskdash.git
 
 # 2. 装成 skill(软链到 ~/.claude/skills;Windows PowerShell,无需管理员)
+#    ⚠ 就在 clone 所在目录执行(仓的父目录,别先 cd 进仓),否则 -Target 会指错
 New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\sansheng-deskdash" -Target "$(Get-Location)\sansheng-deskdash"
 #    macOS / Linux 概念一致(本 skill 只在 Windows 出图,但仓可放任意机器):
 #    ln -s "$(pwd)/sansheng-deskdash" ~/.claude/skills/sansheng-deskdash

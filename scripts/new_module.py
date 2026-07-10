@@ -55,7 +55,9 @@ def generate(mid, dest_root, force=False):
         os.makedirs(target)
 
     prefix = derive_prefix(mid)
-    subs = {"__ID__": mid, "__PREFIX__": prefix, "__NAME__": mid}
+    # 展示名:kebab-id → 标题化(my-nas → My Nas),作者可自行改成中文名
+    display_name = " ".join(w.capitalize() for w in mid.replace("_", "-").split("-") if w) or mid
+    subs = {"__ID__": mid, "__PREFIX__": prefix, "__NAME__": display_name}
 
     written = []
     for fn in _skeleton_files():

@@ -193,6 +193,28 @@ def test_lock_written(tmp_path):
     assert lock["height"] == res["height"]
 
 
+def test_lock_carries_skin_name(tmp_path):
+    """deploy_skin.ps1 / uninstall.ps1 不传 -SkinName 时从 lock 读 skin_name。
+    assemble 必须生产该字段,否则两脚本的回退路径是死的(只剩自身默认)。"""
+    board = _board(tmp_path)
+    assemble(board, ["demo-a"], size="M")                       # 默认皮肤名
+    lock = json.load(open(os.path.join(board, "modules.lock.json"), encoding="utf-8"))
+    assert lock["skin_name"] == "Deskdash"
+    assemble(board, ["demo-a"], size="M", skin_name="MyBoard")  # 显式皮肤名
+    lock = json.load(open(os.path.join(board, "modules.lock.json"), encoding="utf-8"))
+    assert lock["skin_name"] == "MyBoard"
+
+
+def test_cli_infers_skin_name_from_out(tmp_path):
+    """CLI 的 --out 文件名即皮肤名(deploy 默认找 <Board>\\<SkinName>.ini,两者须同名)。"""
+    from assemble import main
+    board = _board(tmp_path)
+    out = os.path.join(board, "MyBoard.ini")
+    assert main(["--board", board, "--size", "M", "--out", out]) == 0
+    lock = json.load(open(os.path.join(board, "modules.lock.json"), encoding="utf-8"))
+    assert lock["skin_name"] == "MyBoard"
+
+
 # —— 缺模块目录 / 未知档 / 空 lock 的守卫 ——
 
 def test_missing_module_dir(tmp_path):

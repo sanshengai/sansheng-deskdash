@@ -32,6 +32,8 @@ Designed for **non-programmers** (describe it in plain words; never touch Rainme
 git clone https://github.com/sandypoli-boop/sansheng-deskdash.git
 
 # 2. Install as a skill (symlink into ~/.claude/skills; Windows PowerShell, no admin needed)
+#    ⚠ Run this from the directory you cloned INTO (the repo's parent), not inside the repo,
+#      otherwise -Target points at the wrong path.
 New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\sansheng-deskdash" -Target "$(Get-Location)\sansheng-deskdash"
 #    macOS / Linux:  ln -s "$(pwd)/sansheng-deskdash" ~/.claude/skills/sansheng-deskdash
 

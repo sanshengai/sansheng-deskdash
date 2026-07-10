@@ -29,7 +29,8 @@ description: 让 Agent 当你的桌面看板施工队 —— 说人话提需求,
 ### 通用速查(所有命令的真实签名)
 
 - **board(板)** = 一个工作目录 `<board>`,里面每个子目录是一个模块(从本 skill 的 `modules/<id>/` 拷入),外加装配/运行生成的 `modules.lock.json`、`data.inc`、`health.json`、`state/`、`logs/`。**你新建它、把选中的模块拷进去**;它是用户数据,不在本仓内。
-- 脚本路径相对 skill 根目录;`<board>` 用绝对路径;示例板名 `Deskdash`、示例主机 `example.com`、GitHub 用户 `octocat`。
+- `<board>` **默认建在 `%USERPROFILE%\Deskdash`**(用户没指定就用它,别每次即兴选路径);用绝对路径传给脚本。
+- 脚本路径相对 skill 根目录;示例板名 `Deskdash`、示例主机 `example.com`、GitHub 用户 `octocat`。
 - ps1 一律 `powershell -ExecutionPolicy Bypass -File <ps1> ...` 调用(不改系统策略、不下载)。
 - 仓内源文件 UTF-8;皮肤部署副本与 `data.inc`/`todos.inc` 的 UTF-16 由脚本自动转,**你不手动碰编码**。
 
