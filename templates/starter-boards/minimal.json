@@ -1,0 +1,8 @@
+{
+  "id": "minimal",
+  "name_zh": "极简",
+  "name_en": "Minimal",
+  "description": "时钟日历 + 天气 + 待办。零密钥即可上墙,最稳的起点。",
+  "size": "M",
+  "modules": ["clock-calendar", "weather", "todo"]
+}

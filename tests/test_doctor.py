@@ -64,7 +64,20 @@ def test_missing_rainmeter_fails_and_hints_winget(monkeypatch):
     rm = rep["checks"]["rainmeter"]
     assert rm["ok"] is False
     assert "winget" in rm["hint"]
+    assert rm["path"] is None         # 缺失时独立 path 字段为 None
     assert rep["ok"] is False        # 必备项失败 → 整体失败
+
+
+def test_rainmeter_exposes_independent_path(monkeypatch):
+    """rainmeter 检查项带独立 path 字段(= exe 全路径),上层不必从中文 detail 截路径。"""
+    _all_green(monkeypatch)
+    exe = r"C:\PF\Rainmeter\Rainmeter.exe"
+    monkeypatch.setattr(doctor, "_rainmeter_info",
+                        lambda: {"path": exe, "version": "4.5.0.0", "source": "ProgramFiles"})
+    rep = doctor.build_report(board=None)
+    rm = rep["checks"]["rainmeter"]
+    assert rm["ok"] is True
+    assert rm["path"] == exe          # 独立字段直接可用,不依赖解析 detail
 
 
 # —— height_budget 计算 ——

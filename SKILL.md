@@ -48,7 +48,7 @@ description: 让 Agent 当你的桌面看板施工队 —— 说人话提需求,
 ```
 & "<Rainmeter.exe>" !ActivateConfig "Deskdash" "Deskdash.ini"
 ```
-`<Rainmeter.exe>` 取自 doctor 的 `checks.rainmeter.detail`。已激活过的皮肤后续改动只需 deploy 的 `!RefreshApp`。
+`<Rainmeter.exe>` 取自 doctor 的 `checks.rainmeter.path`(独立字段,直接用;不必从中文 `detail` 里截路径)。已激活过的皮肤后续改动只需 deploy 的 `!RefreshApp`。
 
 ---
 
@@ -155,6 +155,7 @@ python scripts/validate_module.py <id目录>  # VALIDATE 门:校验 widget.json 
 - **中文只走 `#变量#`**(经 `data.inc` UTF-16 注入),**不进 Lua/SetOption**,band 段内绝不内联中文字面量(GBK 乱码,见 `references/encoding.md`)。
 - **collector 自包含内联**:模块要能整目录拷走独立跑,**不 import 仓内 `scripts/lib`**;需要的小工具(如温度曲线)内联复制。
 - **stdout 只打一行 JSON**,用 `sys.stdout.buffer.write(json...encode("utf-8"))`,**不用 `print`**(避免平台编码把中文打乱)。
+- **collector 网络调用须自带超时**(`urlopen(..., timeout=)` 等),**调外部命令须自限**(如 `ping -n/-w` 或 `-c/-W`,别裸调)+ 叠 `subprocess.run(timeout=)` 硬杀——否则留下挂死的孤儿/孙进程拖垮整轮采集(见 `references/data-sources.md §5`)。
 
 细节:`references/rainmeter-drawing.md`(贝塞尔/InlineSetting)、`references/layout.md`(带区/原点锚定/平移)、`references/interaction.md`(InputText 只认 Enter / 双击防抖)。
 

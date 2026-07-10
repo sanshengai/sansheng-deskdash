@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "__ID__ 采集器输出契约(扁平标量;键不带 prefix)",
+  "description": "TODO: 列出你 collect() 返回的每个键。字段只增不删(删字段是破坏性变更,须升 major)。校验器仅支持子集关键字,见 references/contribution.md。",
+  "type": "object",
+  "required": ["Title", "Status"],
+  "properties": {
+    "Title": {"type": "string", "description": "板块标题文本。"},
+    "Status": {"type": "string", "description": "TODO: 换成你的真实输出键;每个键都要在这里声明。"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,8 @@
+{
+  "id": "dev",
+  "name_zh": "开发",
+  "name_en": "Developer",
+  "description": "GitHub 动态 + 服务状态 + 网络延迟。盯自己的仓、站点和网速。",
+  "size": "M",
+  "modules": ["github", "server-status", "net-latency"]
+}

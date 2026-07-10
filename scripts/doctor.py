@@ -251,16 +251,18 @@ def _check_platform():
 
 
 def _check_rainmeter():
+    """rainmeter 检查项额外带独立 `path` 字段(= Rainmeter.exe 全路径或 None),
+    供上层直接取用(如 !ActivateConfig / deploy),不必从中文 detail 里正则截路径。"""
     info = _rainmeter_info()
     if info["path"]:
         ver = (" v%s" % info["version"]) if info["version"] else ""
         return {
-            "ok": True, "required": True,
+            "ok": True, "required": True, "path": info["path"],
             "detail": "Rainmeter%s 已安装:%s(来源 %s)" % (ver, info["path"], info["source"]),
             "hint": "",
         }
     return {
-        "ok": False, "required": True,
+        "ok": False, "required": True, "path": None,
         "detail": "未检测到 Rainmeter(Program Files 与注册表都没找到 Rainmeter.exe)。",
         "hint": "安装 Rainmeter:winget install Rainmeter.Rainmeter(或到 rainmeter.net 下载)。",
     }

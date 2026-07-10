@@ -1,0 +1,23 @@
+{
+  "display": {
+    "id": "__ID__",
+    "name": "__NAME__",
+    "name_en": "__NAME__",
+    "version": "0.1.0",
+    "author": "TODO",
+    "license": "MIT",
+    "category": "misc",
+    "screenshot": "screenshot.png",
+    "tags": []
+  },
+  "runtime": {
+    "entry": "collector.py",
+    "refresh": {"mode": "interval", "interval_s": 900, "net_only_ok": true},
+    "timeout_s": 60,
+    "deps": [],
+    "output": {"prefix": "__PREFIX__", "schema": "output.schema.json"},
+    "config": {"schema": "config.schema.json", "example": "config.example.json", "secrets": []},
+    "privacy": {"network": [], "local_read": [], "local_write": []},
+    "band": {"file": "band.inc", "height": 60, "interactive": false}
+  }
+}

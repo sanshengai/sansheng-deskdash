@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "__ID__ 配置契约",
+  "description": "TODO: 定义你的配置项。additionalProperties:false 拦未知字段;密钥字段须在 widget.json 的 config.secrets 里报名(config.example 里留空)。",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "example_option": {"type": "string", "description": "TODO: 换成你的真实配置项;删掉这个示例项。"}
+  }
+}
