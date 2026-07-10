@@ -139,6 +139,28 @@ def test_section_name_conflict_rejected(tmp_path):
     assert "段名" in str(ei.value)
 
 
+# —— 模块 band.inc 声明模板保留段名被拒(拼进 .ini 会静默覆盖模板段)——
+
+def test_reserved_section_name_rejected(tmp_path):
+    board = _board(tmp_path, mods=("demo-a",))
+    band_path = os.path.join(board, "demo-a", "band.inc")
+    with open(band_path, "a", encoding="utf-8") as f:
+        # 声明模板保留段 [Variables] + 一个大小写不同的 [panel](Rainmeter 段名大小写不敏感)
+        f.write("\n[Variables]\nFoo=1\n[panel]\nMeter=Shape\n")
+
+    with pytest.raises(AssembleError) as ei:
+        assemble(board, ["demo-a"], size="M")
+    err = ei.value
+    msg = str(err)
+    # hint 含保留段名与模块 id
+    assert "保留段名" in err.hint
+    assert "demo-a" in err.hint
+    assert "[Variables]" in msg          # 大写保留段被拦
+    assert "[panel]" in msg              # 小写保留段(大小写不敏感)也被拦
+    # 结构化错误可被 agent 消费
+    assert err.to_error()["ok"] is False
+
+
 # —— 超预算报错含可裁模块名 ——
 
 def test_over_budget_names_tallest(tmp_path):

@@ -16,6 +16,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -41,7 +42,14 @@ SIZE_PROFILES = {
     "M": {"font": 11, "first_y": 60, "gap": 20, "bottom": 16},
     "L": {"font": 13, "first_y": 66, "gap": 28, "bottom": 20},
 }
-_FIRST_DIVIDER_Y = 48   # 与模板 [BandDiv0] 一致;首带区必须落在它下方
+
+# 模板 Dash.ini.tpl 已占用的段名 + 装配器自己生成的段名。模块 band.inc 若声明其中任一,
+# 拼进最终 .ini 会静默覆盖模板对应段([Variables] 被覆盖=整板崩)。Rainmeter 段名大小写不敏感,
+# 故一律按小写比对。分隔线段名由 _divider_section 生成为 [BandDiv<n>],用正则匹配。
+_RESERVED_SECTIONS = frozenset(s.lower() for s in (
+    "Rainmeter", "Metadata", "Variables", "Panel", "BoardTitle",
+))
+_RESERVED_SECTION_RE = re.compile(r"^banddiv\d+$")
 
 
 class AssembleError(Exception):
@@ -153,6 +161,30 @@ def _check_uniqueness(mods):
             hint="band.inc 的段名建议带模块 prefix 前缀(如 [Wx...]),保证跨模块唯一。")
 
 
+def _check_reserved_sections(mods):
+    """模块 band.inc 不得声明模板/装配器保留的段名。
+
+    band.inc 若写了 [Variables]/[Panel]/[BoardTitle]/[Rainmeter]/[Metadata] 或分隔线段名
+    [BandDiv<n>],拼进最终 .ini 会静默覆盖模板对应段([Variables] 被覆盖=整板崩)。
+    Rainmeter 段名大小写不敏感,故按小写比对([variables] 同样拦。)
+    """
+    hits = []  # (module_id, section_as_written)
+    for m in mods:
+        for sec in _section_names(m["band_lines"]):
+            key = sec.strip("[]").strip().lower()
+            if key in _RESERVED_SECTIONS or _RESERVED_SECTION_RE.match(key):
+                hits.append((m["id"], sec))
+    if hits:
+        details = ["模块 %s 的 band.inc 用了保留段名 %s" % (mid, sec) for mid, sec in hits]
+        first_mid, first_sec = hits[0]
+        raise AssembleError(
+            "带区段名撞模板保留段(拼进最终 .ini 会静默覆盖模板段,[Variables] 被覆盖=整板崩)",
+            details=details,
+            hint=("模块 %s 的 band.inc 用了保留段名 %s,请改用带模块 prefix 的段名"
+                  "(保留段名:[Rainmeter]/[Metadata]/[Variables]/[Panel]/[BoardTitle]/[BandDiv<n>])。"
+                  % (first_mid, first_sec)))
+
+
 def assemble(board_dir, modules_lock, size="M", height_budget=None):
     """装配整张皮肤 .ini。
 
@@ -175,6 +207,7 @@ def assemble(board_dir, modules_lock, size="M", height_budget=None):
     prof = SIZE_PROFILES[size]
 
     mods = _load_modules(board_dir, modules_lock)
+    _check_reserved_sections(mods)             # 先拦保留段名(比跨模块重名更精确的报错)
     _check_uniqueness(mods)
 
     # —— 自上而下排布 ——
