@@ -47,10 +47,10 @@ C2 = P2 - (P3 - P1) / 6      # 后控制点,借后一个锚点 P3 定切线
 | 命令 | 作用 | 何时用 |
 |---|---|---|
 | `!ActivateConfig "Skin" "Skin.ini"` | **首次把皮肤加载到桌面**(注册 + 显示) | 新皮肤**第一次上墙**必须先跑;否则文件已部署但桌面看不到 |
-| `!RefreshApp` | 重载所有已激活皮肤(读新文件重绘) | 皮肤**已激活过**,之后每次改动重部署只需这个 |
+| `!RefreshApp` | 重扫注册所有 config + 重载已激活皮肤(读新文件重绘);**但不显示未激活的皮肤** | 皮肤**已激活过**,之后每次改动重部署只需这个 |
 | `!Refresh "Skin"` | 只重载指定皮肤 | 交互后定向刷新单个皮肤(todo 用),比 `!RefreshApp` 轻 |
 
-- **典型 bug**:deploy 脚本只写文件 + `!RefreshApp`,新皮肤第一次却"文件在、桌面没有"——因为 `!RefreshApp` 只刷**已激活**的皮肤,没激活的它不认。**新皮肤第一次必须显式 `!ActivateConfig`**(SKILL.md 初装流程已固化此步)。
+- **典型 bug**:deploy 脚本只写文件 + `!RefreshApp`,新皮肤第一次却"文件在、桌面没有"——`!RefreshApp` 会**重扫并注册**新 config(它在 Rainmeter 配置树里认得),但**不会显示未激活的皮肤**;要让皮肤真正上墙,得靠 `!ActivateConfig`。**故新皮肤第一次必须显式 `!ActivateConfig`**(SKILL.md 初装流程已固化此步)。
 - Rainmeter.exe 路径从 `doctor.py` 输出的 `checks.rainmeter.path` 取(独立字段,别去解析中文 `detail`)。
 
 ## 6. 其它常用规则

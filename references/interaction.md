@@ -27,7 +27,7 @@
   ```python
   def click(n, skin=None):
       my_ts = time.time()
-      _log_click(n, my_ts)                 # O_APPEND 原子追加一行 "行号 时间戳"
+      _log_click(n, my_ts)                 # O_APPEND 追加一行 "行号 时间戳"(非内核级原子,见下)
       time.sleep(DBL_WINDOW + 0.03)        # 等足判别窗
       if _count_clicks(n, my_ts) < 2:      # 只读计数,不 truncate → 无写竞争
           toggle(n, skin)
@@ -35,8 +35,9 @@
 
 ### 为什么 `.clicks` 用 `O_APPEND` + 只读计数
 
-- 双击的两个 `UP` 各起**一个进程**,若用"读全文件→改→写回"会互相覆盖(撕裂),计数不准。
-- 改成:每次点击 `os.open(..., O_WRONLY|O_CREAT|O_APPEND)` **单次小写**(Windows 上 append 原子,多进程并发不撕裂),判别只**读文件计数**(不改)。这样两个并发 UP 各追加一行、各自只读统计,天然安全。
+- 双击的两个 `UP` 各起**一个进程**,若用"读全文件→改→写回"会互相覆盖(truncate 竞争),计数不准。
+- 改成:每次点击 `os.open(..., O_WRONLY|O_CREAT|O_APPEND)` **单次小写**,判别只**读文件计数**(不改),从根上避开 read-modify-write 的 truncate 竞争。
+- ⚠ **别把 O_APPEND 当硬原子保证**:CPython 在 Windows 上的 `O_APPEND` 是 CRT 层 **seek-to-end + write 两步**,并非内核级 `FILE_APPEND_DATA` 原子写——高并发下理论上存在丢写(一次 `UP` 覆盖另一次 → 双击被少计成单击、误 toggle,恰是它想防的 bug)。本场景每次点击只追加一行、两次写间隔毫秒级,实测难触发、实践安全;但**高并发模块请另设计**(加锁 / 单写进程 / OS 级原子 API)。
 - 旧点击由 `collector.prune_clicks()` **每轮采集顺手剪掉**(留 `CLICKS_TTL=5s` 内)——orchestrator 周期只跑 `collector.py`,band 从不触发 `render`,故回收**必须挂在采集这条必经路**上,否则 `.clicks` 只增不减、计数越来越慢。
 
 ## 3. 动态定位 `Y=#var#` 与装配不兼容 → 改固定位置
@@ -50,7 +51,7 @@
 | 文件 | 写法 | 保证 | 不保证 |
 |---|---|---|---|
 | `todos.json` | 临时文件 + `os.replace` 原子替换 | **不撕裂**:读方要么见旧全本、要么见新全本,永不半截 | **非**并发安全的 read-modify-write:多进程同时改是 **last-writer-wins**(后写者用自己读到的旧快照覆盖,中间别人的改动会丢) |
-| `.clicks` | `O_APPEND` 单次小写 | **多进程并发追加安全**(靠 `O_APPEND` 原子性) | — |
+| `.clicks` | `O_APPEND` 单次小写 + 只读计数 | 避开 read-modify-write 的 truncate 竞争;本场景(每次追加一行、毫秒级间隔)实践安全 | **非**内核级原子写:Win 上 `O_APPEND`=CRT seek-to-end+write 两步,高并发下理论上会丢写(双击被少计成单击)——勿当硬原子保证,高并发另设计 |
 
 - `todos.json` 的 last-writer-wins 在**桌面单人 widget** 场景可接受(不会两个人同时抢改)。若把本模块当范本扩到多写者,需另加锁/CAS,**别默认它"并发安全"**。
 - 交互后即时反馈靠 `todo_action` 重渲 `todos.inc`(UTF-16),皮肤 `@Include2` 在 `data.inc` 之后载入 → **覆盖同名变量** → 不必等下一轮采集就上屏。中文只经这条 UTF-16 通道(见 `encoding.md`),**绝不用 `!SetOption ... Text 中文`**。

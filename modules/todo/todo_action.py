@@ -143,7 +143,8 @@ def do_input(n, text, skin=None):
 # —— 双击防抖(faithful 迁自私有仓 todo.py)——
 
 def _log_click(n, ts):
-    """原子追加一条点击(O_APPEND 单次小写在 Windows 上原子,多进程并发不撕裂)。"""
+    """追加一条点击(O_APPEND 单次小写)。注:Win 上 O_APPEND=CRT seek-to-end+write 两步,非内核级原子;
+    本场景每次一行、毫秒级间隔实践安全,勿当硬原子保证(丢写细节见 README/interaction.md「并发语义」)。"""
     line = ("%d %.3f\n" % (n, ts)).encode()
     try:
         fd = os.open(collector.CLICKS, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o644)
@@ -173,7 +174,8 @@ def click(n, skin=None):
     """待办文字单击:防抖判别单击/双击。判别窗内仅此一次点击 → 切完成态;≥2 次 → 判为双击,
     交 LeftMouseDoubleClickAction 开编辑框,单击侧不动作(否则双击会误 toggle + 刷新冲掉编辑框)。
     根因:Windows 双击序列 DOWN/UP/DBLCLK/UP,Rainmeter UpAction 触发两次(Skin.cpp 实证)。
-    并发安全:两个 UP 各起一进程,均只追加(原子)+ 只读计数(不 truncate),无文件撕裂。"""
+    并发:两个 UP 各起一进程,均只追加(O_APPEND)+ 只读计数(不 truncate),避开 read-modify-write 竞争;
+    O_APPEND 在 Win 上非内核级原子,高并发理论上会丢写,本场景实践安全(详见「并发语义」)。"""
     my_ts = time.time()
     _log_click(n, my_ts)
     time.sleep(DBL_WINDOW + 0.03)                  # 等足判别窗,让另一次点击(若有)落盘可见

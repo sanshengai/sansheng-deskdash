@@ -52,7 +52,8 @@ def save_todos(todos):
     """原子写 todos.json(先写临时文件再 os.replace,避免读方读到半截)。
     并发语义:os.replace 保证「不撕裂」(读方要么见旧全本、要么见新全本,无半截);
     但整体是 read→modify→write,多进程并发是 last-writer-wins(后写者用自己读到的旧快照
-    覆盖,中间别人的改动会丢)。桌面单人 widget 场景可接受;不同于 .clicks 的 O_APPEND 追加安全。
+    覆盖,中间别人的改动会丢)。桌面单人 widget 场景可接受;有别于 .clicks 走 O_APPEND 追加
+    (避 read-modify-write 竞争,但 Win 上非内核级原子、勿当硬保证)。
     详见 README「并发语义」。"""
     tmp = TODOS + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
@@ -65,7 +66,8 @@ def prune_clicks():
     背景:双击防抖每次单击都 O_APPEND 追加一行(todo_action._log_click);须有人周期回收,
     否则 .clicks 只增不减、_count_clicks 每次全量读会越来越慢。orchestrator 周期只跑
     collector.py,故剪枝挂在这条必经路上(band.inc 从不触发 todo_action render,不能靠它)。
-    并发:.clicks 是 O_APPEND 追加安全;本剪枝是低频单进程 read→rewrite(非原子),极端并发下
+    并发:.clicks 走 O_APPEND 追加(避开 read-modify-write 竞争;Win 上非内核级原子,详见 README
+    「并发语义」的丢写说明,勿当硬原子保证);本剪枝是低频单进程 read→rewrite(非原子),极端并发下
     可能漏掉刚落盘、尚在判别窗内的新行——但那类行 CLICKS_TTL 内不会被剪、下一轮再收,无语义损失。
     安全静默:文件不存在则跳过;坏行/IO 异常一律吞掉,绝不炸 collector。"""
     if not os.path.exists(CLICKS):

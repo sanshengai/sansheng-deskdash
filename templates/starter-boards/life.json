@@ -2,7 +2,7 @@
   "id": "life",
   "name_zh": "生活",
   "name_en": "Life",
-  "description": "天气 + 时钟日历 + 待办,大字号看得清。与「极简」同模块、L 档更醒目,适合日常一瞥。",
+  "description": "天气 + 时钟日历 + 待办 + 网络状况,四模块 L 档大字号铺满。比「极简」多一屏网络状态,起居杂事一眼全掌握。",
   "size": "L",
-  "modules": ["weather", "clock-calendar", "todo"]
+  "modules": ["weather", "clock-calendar", "todo", "net-latency"]
 }

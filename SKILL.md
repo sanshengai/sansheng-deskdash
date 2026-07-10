@@ -120,7 +120,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install_task.ps1 -Board <board>
 ### 2.2 没有 → 现场造:先过探源红绿灯(§2.4),绿灯才动手
 
 ```
-python scripts/new_module.py <id>          # 生成六件套骨架(拷自 templates/module-skeleton/)
+python scripts/new_module.py <id>          # 生成七件套骨架(拷自 templates/module-skeleton/)
 # 编辑 <id>/collector.py 写只读采集逻辑;<id>/band.inc 画带区(§2.5 约束);填 widget.json 的 privacy/output.schema
 python scripts/validate_module.py <id目录>  # VALIDATE 门:校验 widget.json + config.example 过 schema + collector dry-run 打印【实际网络目标 + 输出预览】+ 禁止项 AST 扫描
 ```
