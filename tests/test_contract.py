@@ -130,6 +130,37 @@ def test_pattern():
     assert validate_json("has-dash", schema) != []
 
 
+def test_pattern_rejects_trailing_newline():
+    # 回归:Python 的 $ 匹配"串尾换行之前",re.search 下尾随 \n 会漏网。
+    # 校验器改用 re.fullmatch 后,尾随换行必须被拒(全项目校验地基,零容忍)。
+    prefix_schema = {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$"}
+    assert validate_json("Wx", prefix_schema) == []           # 正常值仍过
+    assert validate_json("Wx\n", prefix_schema) != []         # 尾随换行必拒
+    assert validate_json("collector.py\n", {"type": "string", "pattern": r"^[\w.\-]+\.py$"}) != []
+    assert validate_json("collector.py", {"type": "string", "pattern": r"^[\w.\-]+\.py$"}) == []
+
+    version_schema = {"type": "string", "pattern": r"^\d+\.\d+\.\d+$"}
+    assert validate_json("1.0.0", version_schema) == []       # 正常 semver 过
+    assert validate_json("1.0.0\n", version_schema) != []     # 尾随换行必拒
+
+
+def test_pattern_via_load_widget_trailing_newline(tmp_path):
+    # 端到端:通过 load_widget 走真实 widget.schema.json,尾随换行的 prefix/version 必拒
+    sub_a = tmp_path / "a"
+    sub_a.mkdir()
+    bad_prefix = _valid_weather()
+    bad_prefix["runtime"]["output"]["prefix"] = "Wx\n"
+    with pytest.raises(ContractError):
+        load_widget(_write_widget(sub_a, bad_prefix))
+
+    sub_b = tmp_path / "b"
+    sub_b.mkdir()
+    bad_version = _valid_weather()
+    bad_version["display"]["version"] = "1.0.0\n"
+    with pytest.raises(ContractError):
+        load_widget(_write_widget(sub_b, bad_version))
+
+
 def test_multiple_errors_aggregated():
     # 不短路:一次给全所有问题
     schema = {"type": "object", "required": ["a", "b"],

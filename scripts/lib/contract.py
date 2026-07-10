@@ -83,8 +83,11 @@ def validate_json(instance, schema, path="$"):
             errors.append("%s: 值 %r 不在允许集合 %r 内" % (path, instance, allowed))
 
     # 3) pattern(仅字符串)
+    # 用 fullmatch 而非 search:schema 模式多以 $ 收尾,而 Python 的 $ 匹配"串尾换行之前",
+    # search 下 "Wx\n"/"1.0.0\n" 之类尾随换行会漏网。fullmatch 要求整串匹配,堵住此洞;
+    # 模式里冗余的 ^/$ 锚点在 fullmatch 下无害(整串匹配语义兼容)。
     if "pattern" in schema and isinstance(instance, str):
-        if re.search(schema["pattern"], instance) is None:
+        if re.fullmatch(schema["pattern"], instance) is None:
             errors.append("%s: 值 %r 不匹配格式 %s" % (path, instance, schema["pattern"]))
 
     # 4) minimum / maximum(仅数值,排除 bool)
