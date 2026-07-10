@@ -11,7 +11,7 @@
 #   · 相邻带区之间插一条分隔线(位于间距中点);
 #   · 总高 H = 末带区底 + 底部留白(bottom)。
 #
-# 编码:产出 UTF-8 源文本(部署转 UTF-16 由 Task 7 deploy 脚本负责,本模块不做转换)。
+# 编码:产出 UTF-8 源文本(部署转 UTF-16 由 deploy 脚本 deploy_skin.ps1 负责,本模块不做转换)。
 # 数据一律走 @Include 变量,皮肤段绝不内联中文(见 references/encoding.md 的 GBK 桥)。
 import argparse
 import json

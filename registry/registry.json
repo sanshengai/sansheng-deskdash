@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "modules": [
+    {
+      "id": "clock-calendar",
+      "name": "时钟日历",
+      "name_en": "Clock & Calendar",
+      "category": "time",
+      "author": "sansheng",
+      "version": "0.1.0",
+      "tier": "bronze",
+      "screenshot": "modules/clock-calendar/screenshot.png",
+      "description": "时钟 + 当月日历,今天高亮;零网络零密钥,最稳的地基。",
+      "description_en": "Clock plus a current-month calendar with today highlighted; no network, no keys — the rock-solid foundation tile."
+    },
+    {
+      "id": "weather",
+      "name": "天气",
+      "name_en": "Weather",
+      "category": "weather",
+      "author": "sansheng",
+      "version": "0.1.0",
+      "tier": "bronze",
+      "screenshot": "modules/weather/screenshot.png",
+      "description": "当前天气 + 7 天预报(温度曲线);open-meteo 免密可用,可选彩云 token。",
+      "description_en": "Current conditions plus a 7-day forecast with temperature curves; works keyless via open-meteo, optional Caiyun token."
+    },
+    {
+      "id": "todo",
+      "name": "待办清单",
+      "name_en": "Todo",
+      "category": "tasks",
+      "author": "sansheng",
+      "version": "0.1.0",
+      "tier": "bronze",
+      "screenshot": "modules/todo/screenshot.png",
+      "description": "在壁纸上就地勾选 / 新增 / 编辑 / 删除待办;交互旗舰,零网络零密钥。",
+      "description_en": "Check off / add / edit / delete todos right on the wallpaper; the interactive flagship, no network, no keys."
+    },
+    {
+      "id": "github",
+      "name": "GitHub 动态",
+      "name_en": "GitHub Activity",
+      "category": "dev",
+      "author": "sansheng",
+      "version": "0.1.0",
+      "tier": "bronze",
+      "screenshot": "modules/github/screenshot.png",
+      "description": "你的 star / PR 概览 + 热门仓列表;有 gh CLI 走 CLI,否则降级匿名 REST。",
+      "description_en": "Your stars / PR overview plus top-repo list; uses gh CLI when present, else falls back to anonymous REST."
+    },
+    {
+      "id": "net-latency",
+      "name": "网络延迟",
+      "name_en": "Network Latency",
+      "category": "network",
+      "author": "sansheng",
+      "version": "0.1.0",
+      "tier": "bronze",
+      "screenshot": "modules/net-latency/screenshot.png",
+      "description": "多目标网络延迟(ping / TLS 握手),一眼看网快不快。",
+      "description_en": "Latency to several targets (ping / TLS handshake) — see at a glance how fast your network is."
+    },
+    {
+      "id": "server-status",
+      "name": "服务状态",
+      "category": "system",
+      "name_en": "Server Status",
+      "author": "sansheng",
+      "version": "0.1.0",
+      "tier": "bronze",
+      "screenshot": "modules/server-status/screenshot.png",
+      "description": "服务健康(HTTP 状态码 + 延迟 / ping),盯自己的站点在不在。",
+      "description_en": "Service health (HTTP status code + latency / ping) — watch whether your own sites are up."
+    }
+  ]
+}

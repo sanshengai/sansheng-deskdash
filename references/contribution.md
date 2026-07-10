@@ -67,3 +67,29 @@ python scripts/validate_module.py modules/<id>   # 3. 本地校验(与未来 CI 
 - README 里的 privacy 三元组与降级说明对得上 widget.json。
 
 **CI 细节(11 项检查、机器人评论、自动合并阈值、owner/adoption/attic 治理)见 P1 计划,不在本篇。**
+
+## 7. registry.json 结构(单源画廊数据)
+
+`registry/registry.json` 是模块画廊的**单一数据源**:`scripts/gen_readme_gallery.py` 读它幂等生成中英 README 里 `<!-- GALLERY:START -->` / `<!-- GALLERY:END -->` 之间的表格(勿手改表格,改数据源后重跑脚本)。
+
+```jsonc
+{
+  "schema_version": 1,
+  "modules": [
+    {
+      "id": "clock-calendar",           // = 模块目录名(唯一)
+      "name": "时钟日历",                // 中文名(= widget.json display.name)
+      "name_en": "Clock & Calendar",    // 英文名(= display.name_en)
+      "category": "time",               // 类目(= display.category)
+      "author": "sansheng",             // 作者(= display.author)
+      "version": "0.1.0",               // 版本(= display.version)
+      "tier": "bronze",                 // 质量评级:bronze|silver|gold —— 由社区机器人评定,作者禁自评
+      "screenshot": "modules/clock-calendar/screenshot.png",  // 相对仓根的截图路径(≥640×360)
+      "description": "……",             // 中文一句话说明
+      "description_en": "……"           // 英文一句话说明
+    }
+  ]
+}
+```
+
+字段与各模块 `widget.json` 的 `display` 段一一对应(单一事实源在 widget.json,registry 是聚合视图);回流 PR 时**恰好追加一条**,`id == 目录名`,不改别人的条目(见 §3)。

@@ -60,12 +60,12 @@
 
 ```json
 {
-  "skin_name": "DeskdashDemo",
+  "skin_name": "Deskdash",
   "rainmeter_exe": "C:\\Program Files\\Rainmeter\\Rainmeter.exe"
 }
 ```
 
-- `skin_name`:部署后的皮肤 config 名。交互后 `!Refresh` 定向刷新该皮肤;**留空则走 `!RefreshApp` 全刷**(略重但稳)。部署脚本(Task 7)会自动填。
+- `skin_name`:部署后的皮肤 config 名。交互后 `!Refresh` 定向刷新该皮肤;**留空则走 `!RefreshApp` 全刷**(略重但稳)。部署脚本会自动填。
 - `rainmeter_exe`:Rainmeter.exe 路径,缺省用标准安装路径。
 - 无密钥字段(`secrets: []`)。
 

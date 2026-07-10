@@ -4,7 +4,7 @@
 ;  · 仓内此模板与装配产物均为 UTF-8;部署副本转 UTF-16 LE+BOM 由 deploy 脚本负责。
 ;  · 数据一律走 @Include 变量(data.inc / todos.inc),皮肤段绝不内联中文字面量
 ;    (Rainmeter 读中文需 UTF-16,内联易 GBK 乱码 —— 见 references/encoding.md)。
-;  占位符清单(供 Task 4 调度器 / Task 7 部署对接;下方用不带花括号的名字以免被自身替换):
+;  占位符清单(供调度器 orchestrator.py / 部署脚本 deploy_skin.ps1 对接;下方用不带花括号的名字以免被自身替换):
 ;    H         总高度(装配算出,整数)                    → 见 [Variables] H=
 ;    SIZE_FONT 本次装配选中的档位字号(S/M/L → 数字)      → 见 [Variables] Size=
 ;    DATA_INC  data.inc 绝对路径(orchestrator 运行时生成,UTF-16) → 见 @Include
