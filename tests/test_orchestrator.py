@@ -383,6 +383,39 @@ def test_missing_module_dir_recorded(tmp_path):
 
 
 # ============================================================
+# 模块级隔离:坏输出(嵌套 dict/list)不崩整轮,好模块照常落盘
+# ============================================================
+
+# 输出含嵌套 dict + list:能过宽松 schema(type:object),但 to_inc 无法拍平为标量
+SRC_NESTED = "import json\nprint(json.dumps({'Blob': {'a': 1}, 'Arr': [2, 3]}))\n"
+
+
+def test_bad_nested_output_isolated_not_crash_whole_round(tmp_path):
+    board = str(tmp_path)
+    _mod(board, "good", "Good", _ok_src(21))                 # 正常标量模块
+    bad = _mod(board, "bad", "Bad", SRC_NESTED)              # 嵌套输出模块
+    _dump(os.path.join(bad, "output.schema.json"), {"type": "object"})  # 宽松 schema:放行嵌套
+    _lock(board, ["good", "bad"])
+
+    # ① run() 不抛异常,正常返回
+    res = orch.run(board)
+    assert res["outputs"]["Good"]["Temp"] == 21              # 好模块照常并入
+
+    # ② data.inc 含正常模块变量;④ 不含坏模块半拉子内容(整段缺席,连前缀都不出现)
+    inc = _data_inc(board)
+    assert "GoodTemp=21" in inc and "GoodCity=demo" in inc and "GoodStale=0" in inc
+    assert "Bad" not in inc
+
+    # ③ 坏模块记了 health bug 失败
+    hb = _health(board)["modules"]["bad"]
+    assert hb["last_err"]["kind"] == "bug"
+    assert hb["fail_streak"] == 1
+    # 好模块 health 不受牵连
+    hg = _health(board)["modules"]["good"]
+    assert hg["fail_streak"] == 0 and hg["last_ok"]
+
+
+# ============================================================
 # CLI
 # ============================================================
 

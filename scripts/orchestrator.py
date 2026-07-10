@@ -309,6 +309,34 @@ def _record_fail_load(st, err, mid, events):
         events.append("unavailable: %s (%s) %s" % (mid, err["kind"], err["hint_for_agent"]))
 
 
+# —— 聚合前的模块级隔离拍平 ——
+
+def _isolate_flattenable(outputs, prefix_spec, hmods, events):
+    """逐 prefix 单独试跑 to_inc:能安全拍平的保留;抛 ValueError 的模块丢弃其本轮输出、
+    记一次 health bug(hint 指向"输出须为标量、勿嵌套"),再继续处理其余模块。
+
+    为何逐模块而非整体 try/except:整体 try 会因一个坏模块令整轮 data.inc 写失败、冻结所有
+    好模块(退化成源 collect.py 的行为)。逐模块试跑才是真隔离——坏模块本轮缺席不落 data.inc,
+    好模块照常落盘,单模块挂死不拖垮整轮(核心不变量)。
+    """
+    safe = {}
+    for prefix, kv in (outputs or {}).items():
+        try:
+            to_inc({prefix: kv})            # 单模块试拍平:不落盘,只校验能否安全拍平为标量变量
+        except ValueError:
+            spec = prefix_spec.get(prefix)
+            st = hmods.get(spec.id) if spec is not None else None
+            if spec is not None and st is not None:
+                err = make_error(
+                    "bug", False,
+                    "模块输出无法拍平为 Rainmeter 变量,可能含嵌套 dict/list;"
+                    "请让每个 output 值为标量(如 days[0]['tmax'] 拆成键 1Tmax)。")["err"]
+                _record_fail(spec, st, err, events)
+            continue
+        safe[prefix] = kv
+    return safe
+
+
 # —— 主流程 ——
 
 def run(board_dir, net_only=False, only=None, now=None):
@@ -363,12 +391,17 @@ def run(board_dir, net_only=False, only=None, now=None):
     if heavy and all(hmods[s.id].get("last_heavy_date") == today for s in heavy):
         health["done_date"] = today
 
+    # 模块级隔离拍平:逐 prefix 试跑 to_inc,坏输出(嵌套容器/非法键)只丢该模块并记 health bug,
+    # 不让一个坏模块的 ValueError 崩掉整轮、冻结所有好模块的新数据(须在写 health/汇总 errors 之前)。
+    prefix_spec = {s.prefix: s for s in specs}
+    safe_outputs = _isolate_flattenable(outputs, prefix_spec, hmods, events)
+
     health["generated_at"] = now.isoformat(timespec="seconds")
     _write_json(os.path.join(board_dir, "health.json"), health)
 
-    # 汇总各模块 outputs → data.inc(UTF-16,Rainmeter 中文不乱码)
+    # 汇总能安全拍平的模块 outputs → data.inc(UTF-16,Rainmeter 中文不乱码)
     data_inc = os.path.join(board_dir, "data.inc")
-    atomic_write(data_inc, to_inc(outputs), encoding="utf-16")
+    atomic_write(data_inc, to_inc(safe_outputs), encoding="utf-16")
 
     errors = ["%s: %s: %s" % (mid, m["last_err"]["kind"], m["last_err"]["hint_for_agent"])
               for mid, m in hmods.items() if m.get("last_err")]

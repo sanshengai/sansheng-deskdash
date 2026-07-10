@@ -6,6 +6,7 @@ data.inc
 todos.inc
 health.json
 installed.json
+state/
 *.log
 
 # Python 缓存
