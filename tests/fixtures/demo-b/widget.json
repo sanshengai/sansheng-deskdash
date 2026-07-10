@@ -1,0 +1,21 @@
+{
+  "display": {
+    "id": "demo-b",
+    "name": "示例乙",
+    "name_en": "Demo B",
+    "version": "0.1.0",
+    "author": "sansheng",
+    "license": "MIT",
+    "category": "system",
+    "screenshot": "screenshot.png"
+  },
+  "runtime": {
+    "entry": "collector.py",
+    "refresh": {"mode": "interval", "interval_s": 300, "net_only_ok": true},
+    "deps": [],
+    "output": {"prefix": "Info", "schema": "output.schema.json"},
+    "config": {"schema": "config.schema.json", "example": "config.example.json", "secrets": []},
+    "privacy": {"network": ["example.com"], "local_read": [], "local_write": []},
+    "band": {"file": "band.inc", "height": 100, "interactive": false}
+  }
+}
