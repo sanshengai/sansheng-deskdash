@@ -1,0 +1,14 @@
+{
+  "name": "sansheng-deskdash-marketplace",
+  "description": "叁笙's desktop-dashboard construction-crew skill for Claude Code.",
+  "owner": { "name": "叁笙 (sansheng)", "email": "sandypoli@gmail.com" },
+  "plugins": [
+    {
+      "name": "sansheng-deskdash",
+      "description": "Agent-built native Windows desktop dashboard: say what you want to watch, the agent interviews you, writes read-only collectors for any data source, assembles a Rainmeter board pinned to your wallpaper, and repairs it when modules break.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": { "name": "叁笙 (sansheng)", "email": "sandypoli@gmail.com" }
+    }
+  ]
+}

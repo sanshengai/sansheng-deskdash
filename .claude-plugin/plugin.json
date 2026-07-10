@@ -1,0 +1,10 @@
+{
+  "name": "sansheng-deskdash",
+  "description": "Agent-built native Windows desktop dashboard: say what you want to watch, the agent interviews you, writes read-only collectors for any data source, assembles a Rainmeter board pinned to your wallpaper, and repairs it when modules break.",
+  "version": "0.1.0",
+  "author": { "name": "叁笙 (sansheng)", "email": "sandypoli@gmail.com" },
+  "homepage": "https://github.com/sandypoli-boop/sansheng-deskdash",
+  "repository": "https://github.com/sandypoli-boop/sansheng-deskdash",
+  "license": "MIT",
+  "keywords": ["claude-code", "claude-code-skills", "claude-skills", "agent-skills", "rainmeter", "desktop-dashboard", "windows", "widgets", "self-healing", "chinese"]
+}
