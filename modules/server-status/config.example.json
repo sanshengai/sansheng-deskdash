@@ -1,0 +1,7 @@
+{
+  "hosts": [
+    {"label": "官网", "url": "https://example.com"},
+    {"label": "API", "url": "https://example.com/health"},
+    {"label": "源站", "ping_host": "1.1.1.1"}
+  ]
+}

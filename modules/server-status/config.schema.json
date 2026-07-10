@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "server-status 配置契约",
+  "description": "hosts 为探测目标列表(最多 5 个,band.inc 固定 5 行);无密钥。每项 url(HTTP 探测)或 ping_host(ping)至少给一个。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["hosts"],
+  "properties": {
+    "hosts": {
+      "type": "array",
+      "description": "探测目标;超过 5 个会被截断。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label"],
+        "properties": {
+          "label": {"type": "string", "description": "显示名。"},
+          "url": {"type": "string", "description": "HTTP health URL(有则 GET 取状态码+响应时间;2xx/3xx 视为在线)。"},
+          "ping_host": {"type": "string", "description": "主机名或 IP(无 url 时对它 ping;国内域名/裸 IP 适用)。"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "display": {
+    "id": "github",
+    "name": "GitHub 动态",
+    "name_en": "GitHub Activity",
+    "version": "0.1.0",
+    "author": "sansheng",
+    "license": "MIT",
+    "category": "dev",
+    "screenshot": "screenshot.png",
+    "tags": ["github", "repos", "stars", "dev"]
+  },
+  "runtime": {
+    "entry": "collector.py",
+    "refresh": {"mode": "interval", "interval_s": 900, "net_only_ok": true},
+    "timeout_s": 40,
+    "deps": [],
+    "output": {"prefix": "Gh", "schema": "output.schema.json"},
+    "config": {"schema": "config.schema.json", "example": "config.example.json", "secrets": []},
+    "privacy": {"network": ["api.github.com"], "local_read": [], "local_write": []},
+    "band": {"file": "band.inc", "height": 150, "interactive": false}
+  }
+}

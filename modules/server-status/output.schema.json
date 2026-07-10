@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "server-status 采集器输出契约(扁平标量;键不带 prefix)",
+  "description": "Host1..Host5 为固定槽位(对应 band.inc 5 行);未用槽位空白。字段只增不删。",
+  "type": "object",
+  "required": ["Count"],
+  "properties": {
+    "Title": {"type": "string"},
+    "Count": {"type": "integer", "minimum": 0, "description": "有效主机数(0..5)。"},
+
+    "Host1Label": {"type": "string"}, "Host1Status": {"type": "string"},
+    "Host1Ms": {"type": "integer", "description": "延迟/响应毫秒;-1=不通/未用。"},
+    "Host1Text": {"type": "string"}, "Host1Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "Host1Color": {"type": "string"},
+
+    "Host2Label": {"type": "string"}, "Host2Status": {"type": "string"},
+    "Host2Ms": {"type": "integer"}, "Host2Text": {"type": "string"},
+    "Host2Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "Host2Color": {"type": "string"},
+
+    "Host3Label": {"type": "string"}, "Host3Status": {"type": "string"},
+    "Host3Ms": {"type": "integer"}, "Host3Text": {"type": "string"},
+    "Host3Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "Host3Color": {"type": "string"},
+
+    "Host4Label": {"type": "string"}, "Host4Status": {"type": "string"},
+    "Host4Ms": {"type": "integer"}, "Host4Text": {"type": "string"},
+    "Host4Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "Host4Color": {"type": "string"},
+
+    "Host5Label": {"type": "string"}, "Host5Status": {"type": "string"},
+    "Host5Ms": {"type": "integer"}, "Host5Text": {"type": "string"},
+    "Host5Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "Host5Color": {"type": "string"}
+  },
+  "additionalProperties": false
+}

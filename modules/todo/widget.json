@@ -1,0 +1,23 @@
+{
+  "display": {
+    "id": "todo",
+    "name": "待办清单",
+    "name_en": "Todo",
+    "version": "0.1.0",
+    "author": "sansheng",
+    "license": "MIT",
+    "category": "tasks",
+    "screenshot": "screenshot.png",
+    "tags": ["todo", "tasks", "checklist", "interactive"]
+  },
+  "runtime": {
+    "entry": "collector.py",
+    "refresh": {"mode": "interval", "interval_s": 0, "net_only_ok": false},
+    "timeout_s": 15,
+    "deps": [],
+    "output": {"prefix": "Td", "schema": "output.schema.json"},
+    "config": {"schema": "config.schema.json", "example": "config.example.json", "secrets": []},
+    "privacy": {"network": [], "local_read": ["todos.json"], "local_write": ["todos.json", "todos.inc", ".clicks"]},
+    "band": {"file": "band.inc", "height": 172, "interactive": true}
+  }
+}

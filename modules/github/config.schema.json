@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "github 配置契约",
+  "description": "只需一个用户名;无密钥(gh CLI 认证由本机 gh 管理,不进本模块 config)。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["username"],
+  "properties": {
+    "username": {"type": "string", "description": "GitHub 用户名(取其公开仓;示例 octocat)。"},
+    "max_repos": {"type": "integer", "minimum": 1, "maximum": 5, "description": "展示仓数上限(band 固定 5 行);缺省 5。"},
+    "include_forks": {"type": "boolean", "description": "是否包含 fork 仓;缺省 false。"},
+    "use_gh_cli": {"type": "boolean", "description": "优先用 gh CLI(存在即用,失败降级 REST);缺省 true。设 false 强制走 REST 匿名。"}
+  }
+}

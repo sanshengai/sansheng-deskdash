@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "github 采集器输出契约(扁平标量;键不带 prefix)",
+  "description": "Repo1..Repo5 为固定槽位(对应 band.inc 5 行);未用槽位透明。字段只增不删。",
+  "type": "object",
+  "required": ["Count"],
+  "properties": {
+    "Title": {"type": "string"},
+    "User": {"type": "string"},
+    "Source": {"type": "string", "description": "数据源:gh(CLI)/ rest(匿名)。"},
+    "Count": {"type": "integer", "minimum": 0, "description": "展示的仓数(0..5)。"},
+    "StarsTotal": {"type": "integer", "minimum": 0},
+    "StarsTotalText": {"type": "string"},
+    "OpenPrTotal": {"type": "integer", "description": "开放 PR 总数;-1=未取到(best-effort)。"},
+    "OpenPrText": {"type": "string"},
+    "SummaryText": {"type": "string", "description": "表头右侧汇总(★总star · PR数)。"},
+
+    "Repo1Name": {"type": "string"}, "Repo1Stars": {"type": "integer", "minimum": 0},
+    "Repo1StarsText": {"type": "string"}, "Repo1Lang": {"type": "string"},
+    "Repo1Activity": {"type": "string"}, "Repo1DotColor": {"type": "string"},
+    "Repo1Url": {"type": "string"}, "Repo1MetaText": {"type": "string"},
+
+    "Repo2Name": {"type": "string"}, "Repo2Stars": {"type": "integer", "minimum": 0},
+    "Repo2StarsText": {"type": "string"}, "Repo2Lang": {"type": "string"},
+    "Repo2Activity": {"type": "string"}, "Repo2DotColor": {"type": "string"},
+    "Repo2Url": {"type": "string"}, "Repo2MetaText": {"type": "string"},
+
+    "Repo3Name": {"type": "string"}, "Repo3Stars": {"type": "integer", "minimum": 0},
+    "Repo3StarsText": {"type": "string"}, "Repo3Lang": {"type": "string"},
+    "Repo3Activity": {"type": "string"}, "Repo3DotColor": {"type": "string"},
+    "Repo3Url": {"type": "string"}, "Repo3MetaText": {"type": "string"},
+
+    "Repo4Name": {"type": "string"}, "Repo4Stars": {"type": "integer", "minimum": 0},
+    "Repo4StarsText": {"type": "string"}, "Repo4Lang": {"type": "string"},
+    "Repo4Activity": {"type": "string"}, "Repo4DotColor": {"type": "string"},
+    "Repo4Url": {"type": "string"}, "Repo4MetaText": {"type": "string"},
+
+    "Repo5Name": {"type": "string"}, "Repo5Stars": {"type": "integer", "minimum": 0},
+    "Repo5StarsText": {"type": "string"}, "Repo5Lang": {"type": "string"},
+    "Repo5Activity": {"type": "string"}, "Repo5DotColor": {"type": "string"},
+    "Repo5Url": {"type": "string"}, "Repo5MetaText": {"type": "string"}
+  },
+  "additionalProperties": false
+}
