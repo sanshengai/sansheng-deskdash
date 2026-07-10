@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sansheng/sansheng-deskdash/schemas/widget.schema.json",
+  "title": "sansheng-deskdash widget contract",
+  "description": "模块契约:单文件双段。display 段供 registry/README 只读;runtime 段供 orchestrator/assembler 只读。校验器是 scripts/lib/contract.py 里的 stdlib JSON Schema 子集(不引第三方 jsonschema)。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["display", "runtime"],
+  "properties": {
+    "display": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "name_en", "version", "author", "license", "category", "screenshot"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "模块 id,等于目录名;小写字母/数字/连字符,字母开头。"
+        },
+        "name": {"type": "string", "description": "中文名。"},
+        "name_en": {"type": "string", "description": "英文名。"},
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "语义版本 X.Y.Z。"
+        },
+        "author": {"type": "string"},
+        "license": {"type": "string"},
+        "category": {"type": "string", "description": "分类,展示用(如 time/weather/tasks/dev/system/network)。"},
+        "screenshot": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "description": "截图文件名(裸文件名,模块目录内);无路径分隔符。"
+        },
+        "tags": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "可选标签。"
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry", "refresh", "deps", "output", "config", "privacy", "band"],
+      "properties": {
+        "entry": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+\\.py$",
+          "description": "采集器入口脚本文件名,如 collector.py。"
+        },
+        "refresh": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "interval_s", "net_only_ok"],
+          "properties": {
+            "mode": {
+              "enum": ["interval", "daily_heavy", "on_demand"],
+              "description": "刷新方式:interval 按周期 / daily_heavy 每日重活 / on_demand 按需。"
+            },
+            "interval_s": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "刷新周期秒;0=跟随全局。"
+            },
+            "net_only_ok": {
+              "type": "boolean",
+              "description": "true=可进 net-only 快路径(仅联网、无本地重活)。"
+            }
+          }
+        },
+        "timeout_s": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120,
+          "description": "单次采集超时秒;缺省 60(由 load_widget 补默认),上限 120,调度器强制杀超时。"
+        },
+        "deps": {
+          "type": "array",
+          "items": {"enum": ["requests", "Pillow"]},
+          "description": "pip 依赖;仅允许白名单 requests / Pillow;零依赖模块用空数组。"
+        },
+        "output": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["prefix", "schema"],
+          "properties": {
+            "prefix": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9]*$",
+              "description": "变量命名空间前缀(全局唯一,由装配器校验);字母开头,字母/数字。"
+            },
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "description": "输出 JSON Schema 文件名。"
+            }
+          }
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema", "example", "secrets"],
+          "properties": {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "description": "config JSON Schema 文件名。"
+            },
+            "example": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "description": "config 示例文件名(不含真密钥)。"
+            },
+            "secrets": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "密钥字段名单(报名字不贴值);无密钥用空数组。"
+            }
+          }
+        },
+        "privacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["network", "local_read", "local_write"],
+          "properties": {
+            "network": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "会访问的网络主机/域名;装前向用户朗读。"
+            },
+            "local_read": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "会读取的本地路径。"
+            },
+            "local_write": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "会写入的本地路径(应仅限自身目录)。"
+            }
+          }
+        },
+        "band": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file", "height", "interactive"],
+          "properties": {
+            "file": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "description": "带区 .inc 文件名(局部 Y 坐标)。"
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "带区像素高度,进装配高度预算。"
+            },
+            "interactive": {
+              "type": "boolean",
+              "description": "是否含鼠标交互(如待办点击)。"
+            }
+          }
+        }
+      }
+    }
+  }
+}
