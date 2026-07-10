@@ -23,5 +23,6 @@
 
     "T5Label": {"type": "string"}, "T5Host": {"type": "string"}, "T5Kind": {"type": "string"},
     "T5Ms": {"type": "integer"}, "T5Text": {"type": "string"}, "T5Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "T5Color": {"type": "string"}
-  }
+  },
+  "additionalProperties": false
 }

@@ -45,7 +45,14 @@
 ## 依赖与安全
 
 - **依赖**:无(纯 stdlib `urllib`)。
-- **网络**:`api.open-meteo.com`;彩云档加 `api.caiyunapp.com`;auto 定位加 `ip-api.com`;城市表未命中加 `geocoding-api.open-meteo.com`。**读/写本地**:无。
+- **网络**(`widget.json` 的 `privacy.network` 只放纯机读域名,CI 用「AST 实际请求域 ⊆ privacy 声明」精确子集校验,不带条件注释以免退化成子串匹配):
+  | 声明域 | 何时访问 |
+  |---|---|
+  | `api.open-meteo.com` | 默认 provider(始终) |
+  | `api.caiyunapp.com` | 仅当 `provider=caiyun` |
+  | `ip-api.com` | 仅当 `location_mode=auto` |
+  | `geocoding-api.open-meteo.com` | 内置城市表未命中时兜底 |
+  **读/写本地**:无。
 - 无 `eval` / `exec` / `shell=True`;失败返回结构化错误(auth / network / provider),不抛裸异常。
 
 ## 自验
@@ -55,4 +62,4 @@ python collector.py --config config.example.json
 # → 单行 JSON,含 City / NowTempText / D1TmaxText.. / MaxPath(贝塞尔) 等
 ```
 
-> ⚠ 几何耦合:`collector.py` 顶部的 `COLS_X` / `CURVE_Y_TOP/BOT` 必须与 `band.inc` 的列 X 和曲线 meter `Y=90` 一致,改一处须同步另一处。
+> ⚠ 几何单一真源:列 x 由 `collector.py` 的 `COLS_X` 输出为变量 `Col1X..Col7X`,`band.inc` 的 7 天列一律 `X=#WxColnX#` 引用(不再硬编码),改列几何只改 `COLS_X`。曲线相对 y 范围 `CURVE_Y_TOP/BOT` 只进 Path 字符串、band 不引用;曲线 meter 定位 `Y=90` 硬编码在 band(装配平移器只认数字字面量 Y=)。drift-guard 测试(`tests/test_official_modules.py`)断言三者一致,防未来漂移。

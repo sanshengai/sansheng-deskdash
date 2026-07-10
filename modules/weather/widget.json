@@ -17,7 +17,7 @@
     "deps": [],
     "output": {"prefix": "Wx", "schema": "output.schema.json"},
     "config": {"schema": "config.schema.json", "example": "config.example.json", "secrets": ["caiyun_token"]},
-    "privacy": {"network": ["api.open-meteo.com", "api.caiyunapp.com(仅当 provider=caiyun)", "ip-api.com(仅当 location_mode=auto)", "geocoding-api.open-meteo.com(内置城市表未命中时兜底)"], "local_read": [], "local_write": []},
+    "privacy": {"network": ["api.open-meteo.com", "api.caiyunapp.com", "ip-api.com", "geocoding-api.open-meteo.com"], "local_read": [], "local_write": []},
     "band": {"file": "band.inc", "height": 150, "interactive": false}
   }
 }

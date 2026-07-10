@@ -11,5 +11,6 @@
     "Title": {"type": "string", "description": "带区标题(中文经变量传入)。"},
     "CalPng": {"type": "string", "description": "当月日历 PNG 绝对路径;渲染失败为空串。"},
     "CalReady": {"type": "integer", "minimum": 0, "maximum": 1, "description": "1=日历已渲染;0=降级不显示。"}
-  }
+  },
+  "additionalProperties": false
 }

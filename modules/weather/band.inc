@@ -1,7 +1,8 @@
 ; weather 带区(局部 Y,原点在带区顶;装配整体平移落位)。
 ; 段名带 Wx 前缀;中文/温度文本一律走 #变量#(data.inc/UTF-16),不在本文件内联。
-; 7 列 x 中心 = [44, 99, 155, 210, 265, 321, 376];曲线为 CurveTo 贝塞尔(采集器 temp_curve 生成,相对曲线 meter 原点)。
-; ⚠ 列 x 与曲线几何必须与 collector.py 的 COLS_X/CURVE 常量一致,改一处须同步另一处。
+; 7 列 x 中心走变量 #WxCol1X#..#WxCol7X#(collector.py 的 COLS_X 单一真源,band 不硬编码列 x)。
+; 曲线为 CurveTo 贝塞尔(采集器 temp_curve 生成,相对曲线 meter 原点);曲线 meter 定位 Y=90 由装配平移器处理。
+; ⚠ 改列几何只改 collector.py 的 COLS_X;drift-guard 测试断言 band 列 X 引用 == 采集器 Col*X 输出。
 
 [WxCard]
 Meter=Shape
@@ -44,7 +45,7 @@ Text=#WxNowSummary#
 
 [WxD1Label]
 Meter=String
-X=44
+X=#WxCol1X#
 Y=54
 StringAlign=Center
 FontFace=#Font#
@@ -56,7 +57,7 @@ Text=#WxD1Label#
 
 [WxD2Label]
 Meter=String
-X=99
+X=#WxCol2X#
 Y=54
 StringAlign=Center
 FontFace=#Font#
@@ -68,7 +69,7 @@ Text=#WxD2Label#
 
 [WxD3Label]
 Meter=String
-X=155
+X=#WxCol3X#
 Y=54
 StringAlign=Center
 FontFace=#Font#
@@ -80,7 +81,7 @@ Text=#WxD3Label#
 
 [WxD4Label]
 Meter=String
-X=210
+X=#WxCol4X#
 Y=54
 StringAlign=Center
 FontFace=#Font#
@@ -92,7 +93,7 @@ Text=#WxD4Label#
 
 [WxD5Label]
 Meter=String
-X=265
+X=#WxCol5X#
 Y=54
 StringAlign=Center
 FontFace=#Font#
@@ -104,7 +105,7 @@ Text=#WxD5Label#
 
 [WxD6Label]
 Meter=String
-X=321
+X=#WxCol6X#
 Y=54
 StringAlign=Center
 FontFace=#Font#
@@ -116,7 +117,7 @@ Text=#WxD6Label#
 
 [WxD7Label]
 Meter=String
-X=376
+X=#WxCol7X#
 Y=54
 StringAlign=Center
 FontFace=#Font#
@@ -128,7 +129,7 @@ Text=#WxD7Label#
 
 [WxD1Tmax]
 Meter=String
-X=44
+X=#WxCol1X#
 Y=72
 StringAlign=Center
 FontFace=#Font#
@@ -140,7 +141,7 @@ Text=#WxD1TmaxText#
 
 [WxD2Tmax]
 Meter=String
-X=99
+X=#WxCol2X#
 Y=72
 StringAlign=Center
 FontFace=#Font#
@@ -152,7 +153,7 @@ Text=#WxD2TmaxText#
 
 [WxD3Tmax]
 Meter=String
-X=155
+X=#WxCol3X#
 Y=72
 StringAlign=Center
 FontFace=#Font#
@@ -164,7 +165,7 @@ Text=#WxD3TmaxText#
 
 [WxD4Tmax]
 Meter=String
-X=210
+X=#WxCol4X#
 Y=72
 StringAlign=Center
 FontFace=#Font#
@@ -176,7 +177,7 @@ Text=#WxD4TmaxText#
 
 [WxD5Tmax]
 Meter=String
-X=265
+X=#WxCol5X#
 Y=72
 StringAlign=Center
 FontFace=#Font#
@@ -188,7 +189,7 @@ Text=#WxD5TmaxText#
 
 [WxD6Tmax]
 Meter=String
-X=321
+X=#WxCol6X#
 Y=72
 StringAlign=Center
 FontFace=#Font#
@@ -200,7 +201,7 @@ Text=#WxD6TmaxText#
 
 [WxD7Tmax]
 Meter=String
-X=376
+X=#WxCol7X#
 Y=72
 StringAlign=Center
 FontFace=#Font#
@@ -228,7 +229,7 @@ DynamicVariables=1
 
 [WxD1Tmin]
 Meter=String
-X=44
+X=#WxCol1X#
 Y=126
 StringAlign=Center
 FontFace=#Font#
@@ -240,7 +241,7 @@ Text=#WxD1TminText#
 
 [WxD2Tmin]
 Meter=String
-X=99
+X=#WxCol2X#
 Y=126
 StringAlign=Center
 FontFace=#Font#
@@ -252,7 +253,7 @@ Text=#WxD2TminText#
 
 [WxD3Tmin]
 Meter=String
-X=155
+X=#WxCol3X#
 Y=126
 StringAlign=Center
 FontFace=#Font#
@@ -264,7 +265,7 @@ Text=#WxD3TminText#
 
 [WxD4Tmin]
 Meter=String
-X=210
+X=#WxCol4X#
 Y=126
 StringAlign=Center
 FontFace=#Font#
@@ -276,7 +277,7 @@ Text=#WxD4TminText#
 
 [WxD5Tmin]
 Meter=String
-X=265
+X=#WxCol5X#
 Y=126
 StringAlign=Center
 FontFace=#Font#
@@ -288,7 +289,7 @@ Text=#WxD5TminText#
 
 [WxD6Tmin]
 Meter=String
-X=321
+X=#WxCol6X#
 Y=126
 StringAlign=Center
 FontFace=#Font#
@@ -300,7 +301,7 @@ Text=#WxD6TminText#
 
 [WxD7Tmin]
 Meter=String
-X=376
+X=#WxCol7X#
 Y=126
 StringAlign=Center
 FontFace=#Font#

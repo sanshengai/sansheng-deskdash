@@ -34,6 +34,13 @@
       "type": "string",
       "description": "tmin 贝塞尔 Path 字符串。"
     },
+    "Col1X": {"type": "integer", "description": "第1列中心 x(几何单源:collector.COLS_X→band #WxCol1X#)。"},
+    "Col2X": {"type": "integer"},
+    "Col3X": {"type": "integer"},
+    "Col4X": {"type": "integer"},
+    "Col5X": {"type": "integer"},
+    "Col6X": {"type": "integer"},
+    "Col7X": {"type": "integer"},
     "D1Label": {
       "type": "string"
     },
@@ -160,5 +167,6 @@
     "D7ProbText": {
       "type": "string"
     }
-  }
+  },
+  "additionalProperties": false
 }

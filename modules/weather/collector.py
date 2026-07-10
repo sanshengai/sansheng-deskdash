@@ -6,8 +6,10 @@
 # 契约:`python collector.py --config <config.json>`,stdout 单行 JSON;成功=扁平 outputs,失败=err。
 # 自包含 stdlib(urllib);deps: [](urllib 属 stdlib)。无 eval/exec/shell=True。
 #
-# ⚠ 几何耦合:7 列 x 中心 COLS_X 与曲线相对 y 范围(CURVE_Y_TOP/BOT)必须与 band.inc 一致
-#   (band.inc 的 [WxMaxCurve]/[WxMinCurve] meter Y=90,列 String 的 X 用同一组值)。改一处须同步。
+# ⚠ 几何单一真源:7 列 x 中心 COLS_X 由本采集器输出为变量 Col1X..Col7X(带 Wx 前缀 → #WxCol1X#),
+#   band.inc 的 7 天列 String 一律 X=#WxColnX# 引用,不再硬编码列 x —— 采集器是列几何唯一源,杜绝双写漂移。
+#   曲线的相对 y 范围(CURVE_Y_TOP/BOT)只进 Path 字符串、band 不引用,天然单源;曲线 meter 的定位 Y=90
+#   仍硬编码在 band(装配平移器 shift() 只认数字字面量 Y=,改成变量会漏移 → 由 drift-guard 测试兜底)。
 import argparse
 import json
 import os
@@ -16,8 +18,8 @@ import urllib.request
 import urllib.parse
 from datetime import datetime
 
-# —— 带区几何(须与 band.inc 一致)——
-COLS_X = [44, 99, 155, 210, 265, 321, 376]     # 7 列中心 x(内区 16..404 均分)
+# —— 带区几何(单一真源:列 x 输出为 Col*X 变量供 band.inc 引用,band 不再硬编码)——
+COLS_X = [44, 99, 155, 210, 265, 321, 376]     # 7 列中心 x(内区 16..404 均分);→ 输出 Col1X..Col7X
 CURVE_Y_TOP = 2.0                              # 曲线相对 meter 原点(meter Y=90)的上边界(高温靠上)
 CURVE_Y_BOT = 30.0                             # 下边界(低温靠下)
 
@@ -294,6 +296,10 @@ def _flatten(raw):
     city = raw.get("city", "")
     out = {"City": city, "Provider": raw.get("provider", ""),
            "UpdatedAt": datetime.now().astimezone().strftime("%H:%M")}
+
+    # 列几何单源:输出 Col1X..Col7X(band.inc 的 7 天列 X=#WxColnX# 引用,不硬编码)。
+    for i, cx in enumerate(COLS_X):
+        out["Col%dX" % (i + 1)] = cx
 
     t = today.get("temp")
     out["NowTempText"] = ("%d°" % t) if t is not None else "—°"

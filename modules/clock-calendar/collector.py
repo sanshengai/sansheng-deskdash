@@ -56,7 +56,7 @@ def load_config(path):
 
 def render_cal(now, week_start="monday", out_path=_CAL_PNG):
     """渲染当月日历 PNG(高亮今天),返回绝对路径;PIL 缺失/字体缺失 → 抛异常交上层降级。
-    迁自私有仓 todo.py 的 render_cal:去 sandy 专属路径,加 week_start 与字体兜底。"""
+    迁自私有仓 todo.py 的 render_cal:去私有专属路径,加 week_start 与字体兜底。"""
     from PIL import Image, ImageDraw, ImageFont
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     first = 6 if str(week_start).lower() == "sunday" else 0        # 周日起 / 周一起(默认)

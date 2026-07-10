@@ -17,7 +17,7 @@
     "deps": [],
     "output": {"prefix": "Net", "schema": "output.schema.json"},
     "config": {"schema": "config.schema.json", "example": "config.example.json", "secrets": []},
-    "privacy": {"network": ["config.targets 中声明的主机(装前向用户朗读,如 baidu.com / 1.1.1.1 / github.com)"], "local_read": [], "local_write": []},
+    "privacy": {"network": ["<user-configured>"], "local_read": [], "local_write": []},
     "band": {"file": "band.inc", "height": 150, "interactive": false}
   }
 }

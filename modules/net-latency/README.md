@@ -41,7 +41,7 @@
 ## 依赖与安全
 
 - **依赖**:无(纯 stdlib:`socket` / `ssl` / `subprocess`)。
-- **网络**:仅访问你在 `config.targets` 里声明的主机(装前会向你朗读)。**读/写本地**:无。
+- **网络**:仅访问你在 `config.targets` 里声明的主机(装前会向你朗读)。目标由用户 config 指定,故 `widget.json` 的 `privacy.network` 用机读哨兵 `"<user-configured>"` 表达「运行时域集来自 `config.targets`」——CI 的「AST 请求域 ⊆ privacy 声明」对本模块转为「请求域 ⊆ config.targets 主机」校验。**读/写本地**:无。
 - **自限子进程**:ping 用 `-n`/`-w`(Windows)或 `-c`/`-W`(*nix)限次数 + 单包超时,再叠加进程级硬超时;ping 不派生孙进程,无挂死孤儿隐患。无 `eval` / `exec` / `shell=True`。
 
 ## 自验
