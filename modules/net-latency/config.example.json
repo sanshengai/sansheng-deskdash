@@ -1,0 +1,7 @@
+{
+  "targets": [
+    {"label": "百度", "host": "baidu.com", "kind": "ping"},
+    {"label": "Cloudflare", "host": "1.1.1.1", "kind": "ping"},
+    {"label": "GitHub", "host": "github.com", "kind": "tls"}
+  ]
+}

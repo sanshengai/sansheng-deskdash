@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "weather 采集器输出契约(扁平标量·全字符串;键不带 prefix)",
+  "description": "D1..D7 为 7 天槽位;温度/天气/曲线均为字符串,band.inc 直接引用。字段只增不删。",
+  "type": "object",
+  "required": [
+    "City",
+    "Provider"
+  ],
+  "properties": {
+    "City": {
+      "type": "string"
+    },
+    "Provider": {
+      "type": "string"
+    },
+    "UpdatedAt": {
+      "type": "string"
+    },
+    "NowTempText": {
+      "type": "string"
+    },
+    "NowDesc": {
+      "type": "string"
+    },
+    "NowSummary": {
+      "type": "string"
+    },
+    "MaxPath": {
+      "type": "string",
+      "description": "tmax 贝塞尔 Path 字符串(相对曲线 meter 原点)。"
+    },
+    "MinPath": {
+      "type": "string",
+      "description": "tmin 贝塞尔 Path 字符串。"
+    },
+    "D1Label": {
+      "type": "string"
+    },
+    "D1Date": {
+      "type": "string"
+    },
+    "D1Weather": {
+      "type": "string"
+    },
+    "D1TmaxText": {
+      "type": "string"
+    },
+    "D1TminText": {
+      "type": "string"
+    },
+    "D1ProbText": {
+      "type": "string"
+    },
+    "D2Label": {
+      "type": "string"
+    },
+    "D2Date": {
+      "type": "string"
+    },
+    "D2Weather": {
+      "type": "string"
+    },
+    "D2TmaxText": {
+      "type": "string"
+    },
+    "D2TminText": {
+      "type": "string"
+    },
+    "D2ProbText": {
+      "type": "string"
+    },
+    "D3Label": {
+      "type": "string"
+    },
+    "D3Date": {
+      "type": "string"
+    },
+    "D3Weather": {
+      "type": "string"
+    },
+    "D3TmaxText": {
+      "type": "string"
+    },
+    "D3TminText": {
+      "type": "string"
+    },
+    "D3ProbText": {
+      "type": "string"
+    },
+    "D4Label": {
+      "type": "string"
+    },
+    "D4Date": {
+      "type": "string"
+    },
+    "D4Weather": {
+      "type": "string"
+    },
+    "D4TmaxText": {
+      "type": "string"
+    },
+    "D4TminText": {
+      "type": "string"
+    },
+    "D4ProbText": {
+      "type": "string"
+    },
+    "D5Label": {
+      "type": "string"
+    },
+    "D5Date": {
+      "type": "string"
+    },
+    "D5Weather": {
+      "type": "string"
+    },
+    "D5TmaxText": {
+      "type": "string"
+    },
+    "D5TminText": {
+      "type": "string"
+    },
+    "D5ProbText": {
+      "type": "string"
+    },
+    "D6Label": {
+      "type": "string"
+    },
+    "D6Date": {
+      "type": "string"
+    },
+    "D6Weather": {
+      "type": "string"
+    },
+    "D6TmaxText": {
+      "type": "string"
+    },
+    "D6TminText": {
+      "type": "string"
+    },
+    "D6ProbText": {
+      "type": "string"
+    },
+    "D7Label": {
+      "type": "string"
+    },
+    "D7Date": {
+      "type": "string"
+    },
+    "D7Weather": {
+      "type": "string"
+    },
+    "D7TmaxText": {
+      "type": "string"
+    },
+    "D7TminText": {
+      "type": "string"
+    },
+    "D7ProbText": {
+      "type": "string"
+    }
+  }
+}

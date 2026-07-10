@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "net-latency 采集器输出契约(扁平标量;键不带 prefix)",
+  "description": "T1..T5 为固定槽位(对应 band.inc 5 行);未用槽位空白。字段只增不删。",
+  "type": "object",
+  "required": ["Count"],
+  "properties": {
+    "Title": {"type": "string"},
+    "Count": {"type": "integer", "minimum": 0, "description": "有效目标数(0..5)。"},
+
+    "T1Label": {"type": "string"}, "T1Host": {"type": "string"}, "T1Kind": {"type": "string"},
+    "T1Ms": {"type": "integer", "description": "延迟毫秒;-1=不通/未用。"},
+    "T1Text": {"type": "string"}, "T1Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "T1Color": {"type": "string"},
+
+    "T2Label": {"type": "string"}, "T2Host": {"type": "string"}, "T2Kind": {"type": "string"},
+    "T2Ms": {"type": "integer"}, "T2Text": {"type": "string"}, "T2Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "T2Color": {"type": "string"},
+
+    "T3Label": {"type": "string"}, "T3Host": {"type": "string"}, "T3Kind": {"type": "string"},
+    "T3Ms": {"type": "integer"}, "T3Text": {"type": "string"}, "T3Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "T3Color": {"type": "string"},
+
+    "T4Label": {"type": "string"}, "T4Host": {"type": "string"}, "T4Kind": {"type": "string"},
+    "T4Ms": {"type": "integer"}, "T4Text": {"type": "string"}, "T4Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "T4Color": {"type": "string"},
+
+    "T5Label": {"type": "string"}, "T5Host": {"type": "string"}, "T5Kind": {"type": "string"},
+    "T5Ms": {"type": "integer"}, "T5Text": {"type": "string"}, "T5Ok": {"type": "integer", "minimum": 0, "maximum": 1}, "T5Color": {"type": "string"}
+  }
+}

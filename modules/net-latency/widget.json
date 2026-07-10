@@ -1,0 +1,23 @@
+{
+  "display": {
+    "id": "net-latency",
+    "name": "网络延迟",
+    "name_en": "Network Latency",
+    "version": "0.1.0",
+    "author": "sansheng",
+    "license": "MIT",
+    "category": "network",
+    "screenshot": "screenshot.png",
+    "tags": ["network", "latency", "ping", "tls"]
+  },
+  "runtime": {
+    "entry": "collector.py",
+    "refresh": {"mode": "interval", "interval_s": 300, "net_only_ok": true},
+    "timeout_s": 90,
+    "deps": [],
+    "output": {"prefix": "Net", "schema": "output.schema.json"},
+    "config": {"schema": "config.schema.json", "example": "config.example.json", "secrets": []},
+    "privacy": {"network": ["config.targets 中声明的主机(装前向用户朗读,如 baidu.com / 1.1.1.1 / github.com)"], "local_read": [], "local_write": []},
+    "band": {"file": "band.inc", "height": 150, "interactive": false}
+  }
+}

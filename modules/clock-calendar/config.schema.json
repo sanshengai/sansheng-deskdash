@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "clock-calendar 配置契约",
+  "description": "零网络零密钥;additionalProperties:false 防拼错字段静默失效。",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "show_calendar": {"type": "boolean", "description": "是否渲染并显示当月日历 PNG(默认 true)。"},
+    "week_start": {"enum": ["monday", "sunday"], "description": "每周起始日(默认 monday)。"}
+  }
+}

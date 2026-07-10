@@ -9,6 +9,9 @@ installed.json
 state/
 *.log
 
+# 模块运行时渲染的资产(采集器每轮重绘,非源文件)
+modules/clock-calendar/assets/
+
 # Python 缓存
 __pycache__/
 *.pyc

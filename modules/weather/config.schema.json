@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "weather 配置契约",
+  "description": "双 provider + 双定位;彩云 token 为密钥(secrets 已声明),示例用 open-meteo 免密。",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "provider": {"enum": ["open-meteo", "caiyun"], "description": "数据源:open-meteo 免密(默认)/ caiyun 需 token。"},
+    "caiyun_token": {"type": "string", "description": "彩云天气 token(仅 provider=caiyun 时需要);示例留空。"},
+    "location_mode": {"enum": ["manual", "auto"], "description": "manual=用内置城市表(默认)/ auto=IP 定位(代理下可能不准)。"},
+    "city": {"type": "string", "description": "城市名(manual 模式;内置表见 README)。"},
+    "lat": {"description": "纬度(显式经纬度优先于 city);缺省 null。"},
+    "lon": {"description": "经度;缺省 null。"}
+  }
+}

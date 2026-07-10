@@ -1,0 +1,23 @@
+{
+  "display": {
+    "id": "clock-calendar",
+    "name": "时钟日历",
+    "name_en": "Clock & Calendar",
+    "version": "0.1.0",
+    "author": "sansheng",
+    "license": "MIT",
+    "category": "time",
+    "screenshot": "screenshot.png",
+    "tags": ["clock", "calendar", "time"]
+  },
+  "runtime": {
+    "entry": "collector.py",
+    "refresh": {"mode": "interval", "interval_s": 3600, "net_only_ok": false},
+    "timeout_s": 30,
+    "deps": ["Pillow"],
+    "output": {"prefix": "Clk", "schema": "output.schema.json"},
+    "config": {"schema": "config.schema.json", "example": "config.example.json", "secrets": []},
+    "privacy": {"network": [], "local_read": [], "local_write": ["模块自身 assets/calendar.png"]},
+    "band": {"file": "band.inc", "height": 328, "interactive": false}
+  }
+}

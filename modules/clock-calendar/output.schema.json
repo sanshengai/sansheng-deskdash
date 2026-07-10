@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "clock-calendar 采集器输出契约(扁平标量;键不带 prefix)",
+  "description": "orchestrator 用 lib/contract 的子集校验器校验;字段只增不删(删字段须升 major)。",
+  "type": "object",
+  "required": ["DateText", "CalReady"],
+  "properties": {
+    "DateText": {"type": "string", "description": "日期+星期,如 '7月10日 周四'。"},
+    "Weekday": {"type": "string", "description": "星期,如 '周四'。"},
+    "YearMonth": {"type": "string", "description": "年月,如 '2026年7月'。"},
+    "Title": {"type": "string", "description": "带区标题(中文经变量传入)。"},
+    "CalPng": {"type": "string", "description": "当月日历 PNG 绝对路径;渲染失败为空串。"},
+    "CalReady": {"type": "integer", "minimum": 0, "maximum": 1, "description": "1=日历已渲染;0=降级不显示。"}
+  }
+}

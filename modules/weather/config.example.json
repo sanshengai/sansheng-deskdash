@@ -1,0 +1,6 @@
+{
+  "provider": "open-meteo",
+  "caiyun_token": "",
+  "location_mode": "manual",
+  "city": "北京"
+}

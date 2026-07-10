@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "net-latency 配置契约",
+  "description": "targets 为探测目标列表(最多 5 个,band.inc 固定 5 行);无密钥。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["targets"],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "description": "探测目标;超过 5 个会被截断。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["host"],
+        "properties": {
+          "label": {"type": "string", "description": "显示名(缺省用 host)。"},
+          "host": {"type": "string", "description": "主机名或 IP。"},
+          "kind": {"enum": ["tls", "ping"], "description": "tls=TLS 握手延迟(境外站);ping=ICMP(国内/裸 IP)。缺省 ping。"}
+        }
+      }
+    }
+  }
+}
