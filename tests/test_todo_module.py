@@ -86,10 +86,22 @@ def test_prune_clicks_drops_old(tmp_path):
     _setup(tmp_path, [("a", False)])
     ta._log_click(1, time.time() - 10)   # 旧
     ta._log_click(1, time.time())        # 新
-    ta._prune_clicks()
+    co.prune_clicks()                    # 剪枝已下沉数据层(collector);render 与 collect 共用同一份
     with open(co.CLICKS, encoding="utf-8") as f:
         lines = f.read().splitlines()
-    assert len(lines) == 1                 # 只留 5s 内的
+    assert len(lines) == 1                 # 只留 CLICKS_TTL(5s)内的
+
+
+def test_collect_prunes_clicks(tmp_path):
+    """孤儿剪枝路径补齐:collector 每轮 collect() 顺手剪 .clicks——旧行剪掉、窗内新行保留。
+    (orchestrator 周期只跑 collector.py;band.inc 从不触发 todo_action render,不能靠它回收。)"""
+    _setup(tmp_path, [("a", False)])
+    ta._log_click(1, time.time() - 100)  # 旧点击(远超 CLICKS_TTL)
+    ta._log_click(1, time.time())        # 窗内新点击
+    co.collect({"skin_name": ""})        # 跑一轮采集(内部顺手 prune_clicks)
+    with open(co.CLICKS, encoding="utf-8") as f:
+        lines = f.read().splitlines()
+    assert len(lines) == 1                 # 只留窗内新行,旧行被剪
 
 
 # —— add / 行内输入 / del(模块新增覆盖)——

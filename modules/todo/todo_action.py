@@ -181,21 +181,6 @@ def click(n, skin=None):
         toggle(n, skin)
 
 
-def _prune_clicks():
-    """render 周期调用:剪掉 5s 前的旧点击(单线程路径,无并发)。文件不存在则跳过。"""
-    if not os.path.exists(collector.CLICKS):
-        return
-    cutoff = time.time() - 5
-    try:
-        with open(collector.CLICKS, "r", encoding="utf-8") as f:
-            keep = [ln for ln in f
-                    if len(ln.split()) == 2 and float(ln.split()[1]) >= cutoff]
-        with open(collector.CLICKS, "w", encoding="utf-8") as f:
-            f.writelines(keep)
-    except (OSError, ValueError):
-        pass
-
-
 def main(argv=None):
     a = list(sys.argv[1:] if argv is None else argv)
     if not a:
@@ -212,7 +197,7 @@ def main(argv=None):
         delete(_row(a[1] if len(a) > 1 else None), a[2] if len(a) > 2 else None)
     elif cmd == "render":
         render_inc(collector.load_todos())
-        _prune_clicks()
+        collector.prune_clicks()               # 剪枝逻辑下沉数据层(collector),render 复用同一份
         refresh(a[1] if len(a) > 1 else None)
     return 0
 

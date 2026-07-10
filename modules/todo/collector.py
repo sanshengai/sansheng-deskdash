@@ -17,10 +17,12 @@ import argparse
 import json
 import os
 import sys
+import time
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 TODOS = os.path.join(_HERE, "todos.json")          # 用户数据(gitignore);两脚本同源计算,路径一致
 CLICKS = os.path.join(_HERE, ".clicks")            # 双击防抖点击流水(gitignore)
+CLICKS_TTL = 5.0                                   # .clicks 保留窗(秒);超窗旧行每轮采集剪掉(见 prune_clicks)
 
 PREFIX = "Td"                                      # 输出变量前缀(与 widget.json output.prefix 一致)
 MAX_ROWS = 6                                        # band.inc 固定 6 行;多余待办不显示(仍在 todos.json)
@@ -47,11 +49,36 @@ def load_todos():
 
 
 def save_todos(todos):
-    """原子写 todos.json(先写临时文件再 os.replace,避免读方读到半截)。"""
+    """原子写 todos.json(先写临时文件再 os.replace,避免读方读到半截)。
+    并发语义:os.replace 保证「不撕裂」(读方要么见旧全本、要么见新全本,无半截);
+    但整体是 read→modify→write,多进程并发是 last-writer-wins(后写者用自己读到的旧快照
+    覆盖,中间别人的改动会丢)。桌面单人 widget 场景可接受;不同于 .clicks 的 O_APPEND 追加安全。
+    详见 README「并发语义」。"""
     tmp = TODOS + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump({"todos": todos}, f, ensure_ascii=False, indent=1)
     os.replace(tmp, TODOS)
+
+
+def prune_clicks():
+    """回收 .clicks:剪掉 CLICKS_TTL 秒前的旧点击行。每轮 collect() 顺手调(见 collect)。
+    背景:双击防抖每次单击都 O_APPEND 追加一行(todo_action._log_click);须有人周期回收,
+    否则 .clicks 只增不减、_count_clicks 每次全量读会越来越慢。orchestrator 周期只跑
+    collector.py,故剪枝挂在这条必经路上(band.inc 从不触发 todo_action render,不能靠它)。
+    并发:.clicks 是 O_APPEND 追加安全;本剪枝是低频单进程 read→rewrite(非原子),极端并发下
+    可能漏掉刚落盘、尚在判别窗内的新行——但那类行 CLICKS_TTL 内不会被剪、下一轮再收,无语义损失。
+    安全静默:文件不存在则跳过;坏行/IO 异常一律吞掉,绝不炸 collector。"""
+    if not os.path.exists(CLICKS):
+        return
+    cutoff = time.time() - CLICKS_TTL
+    try:
+        with open(CLICKS, "r", encoding="utf-8") as f:
+            keep = [ln for ln in f
+                    if len(ln.split()) == 2 and float(ln.split()[1]) >= cutoff]
+        with open(CLICKS, "w", encoding="utf-8") as f:
+            f.writelines(keep)
+    except (OSError, ValueError):
+        pass
 
 
 def render_vars(todos):
@@ -101,7 +128,9 @@ def load_config(path):
 
 def collect(cfg):
     """采集待办 → 扁平 outputs。含 band Action 要用的部署变量(Config/Pyw/Script)。
-    这些是本机运行时算出的绝对路径,只落 data.inc(gitignore),不入仓、不涉密钥。"""
+    这些是本机运行时算出的绝对路径,只落 data.inc(gitignore),不入仓、不涉密钥。
+    顺手 prune_clicks():orchestrator 周期只跑本采集器,双击防抖 .clicks 的回收挂在这条必经路。"""
+    prune_clicks()
     todos = load_todos()
     out = render_vars(todos)
     out["Config"] = str(cfg.get("skin_name") or "")
