@@ -47,6 +47,26 @@ Agent 会自动:环境体检(缺 Rainmeter 提示 `winget install Rainmeter.Rain
 
 **要求**:Windows · Rainmeter 4.5+ · Python 3.10+(标准库即可)· 可选 `gh`(GitHub 模块提限流)、`Pillow`(日历配图)。
 
+### 国内加速下载
+
+GitHub 直连不畅时,给 clone 地址前面加一层公共镜像即可(下载源码 zip 同理):
+
+```bash
+# 加速 clone(把 gh-proxy.com 换成 ghfast.top 即备用镜像)
+git clone https://gh-proxy.com/https://github.com/sandypoli-boop/sansheng-deskdash.git
+```
+
+插件市场方式暂无稳定国内镜像;网络不畅时用上面的加速 clone + 软链。
+
+## 更新
+
+升级到新版,取决于你当初怎么装的:
+
+- **插件市场装的**:`claude plugin marketplace update` 刷新市场,再 `claude plugin update sansheng-deskdash`
+- **clone + 软链装的**:进本仓目录 `git pull`(软链即时生效,不必重装、不必重连)
+
+**怎么知道有新版**:看本仓 [Releases](../../releases);点仓库右上角 **Watch → Custom → Releases**,发新版时 GitHub 会通知你。每版改了什么见 [CHANGELOG](CHANGELOG.md)。
+
 ---
 
 ## 官方模块画廊
@@ -135,6 +155,53 @@ python scripts/validate_module.py modules/<id>   # 本地校验(与未来 CI 同
 - **宿主**:Claude Code 原生;根目录 `AGENTS.md` 桥接其他读 AGENTS.md 的 Agent 宿主
 
 ---
+
+## 配套文章 · Article
+
+撰写中,发布后更新链接。
+
+## 关于作者 · About the author
+
+<p align="center">
+  <a href="https://sanshengai.top"><strong>🌐 网站 sanshengai.top</strong></a> ·
+  <a href="https://namecard.xiaoyuzhoufm.com/nnl8x"><strong>🎧 小宇宙</strong></a> ·
+  <a href="https://weibo.com/u/7546221967"><strong>微博</strong></a> ·
+  <a href="https://www.xiaohongshu.com/user/profile/5c716b6d000000001000f5c4"><strong>小红书</strong></a> ·
+  <a href="mailto:sandypoli@gmail.com"><strong>✉️ 邮箱</strong></a>
+</p>
+
+我是**叁笙**,一个用 AI 做内容、也用 AI 造工具的人。我做了个人站「[叁笙早安 AI](https://sanshengai.top)」--
+每天清晨一份 AI 早报,加深度长文,还有一堆自己写来自己用的小东西:读书蒸馏、职业 AI 风险测评、
+GitHub 宝藏精选、AI 羊毛铺......
+
+这个桌面看板,就是我做这些内容、造这些工具时,想让「今天该盯的数」一眼可见,在真实工作流里
+一点点磨出来的。觉得好用,就清洗脱敏开源出来 -- 你可以直接用,也欢迎改成自己的。
+
+如果这些东西对你有用,欢迎来[网站](https://sanshengai.top)逛逛,或**扫码关注公众号「叁笙早安AI」**
+(公众号没有跳转链接,扫码最快):
+
+<p align="center">
+  <img src="assets/qrcode-gongzhonghao.png" alt="微信公众号 叁笙早安AI" width="200">
+  <br><sub>微信扫码关注 · 叁笙早安AI</sub>
+</p>
+
+## Credits & Dependencies · 致谢与依赖
+
+### 致谢
+
+- **[Rainmeter](https://www.rainmeter.net/)** -- 本 skill 的渲染地基。所有「贴壁纸原生皮肤」的能力都由 Rainmeter 提供;本仓只生成它的皮肤配置(`.ini`/`.inc`),不分发 Rainmeter 本体。
+- **[Open-Meteo](https://open-meteo.com/)** -- 天气模块默认的免密钥数据源(CC BY 4.0),让「零配置就有天气」成为可能。
+
+### 运行依赖
+
+- **Windows** + **[Rainmeter](https://www.rainmeter.net/) 4.5+**([GPLv2](https://github.com/rainmeter/rainmeter/blob/master/LICENSE),用户自行 `winget install` 安装的独立运行时,**非本仓捆绑**)
+- **Python >= 3.10** -- 采集器纯标准库;可选包均**非捆绑、用户自装**:`requests`([Apache-2.0](https://github.com/psf/requests/blob/main/LICENSE))/ `Pillow`([HPND](https://github.com/python-pillow/Pillow/blob/main/LICENSE))/ `tzdata`([Apache-2.0](https://github.com/python/tzdata/blob/master/LICENSE),仅用 IANA 时区名时需要)
+- **可选**:`gh`(GitHub CLI,[MIT](https://github.com/cli/cli/blob/trunk/LICENSE),github 模块提限流)
+- **Claude Code**(或任何能按 SKILL.md / AGENTS.md 执行的 agent 宿主)
+
+### License 兼容性
+
+本仓以 MIT 分发,**无捆绑任何第三方代码(vendor)**。Rainmeter(GPLv2)是用户自行安装的独立运行时工具,本仓仅生成其配置文件、不分发其本体,故**无 GPL 传染**;上列 Python 包均为运行时依赖、用户自装,许可与 MIT 兼容。
 
 ## License
 

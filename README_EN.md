@@ -47,6 +47,24 @@ The agent runs an environment check (prompts `winget install Rainmeter.Rainmeter
 
 **Requirements**: Windows · Rainmeter 4.5+ · Python 3.10+ (stdlib only) · optional `gh` (GitHub rate limits), `Pillow` (calendar image).
 
+### Faster download in mainland China
+
+If GitHub is slow to reach directly, prefix the clone URL with a public mirror (same for the source zip):
+
+```bash
+# accelerated clone (swap gh-proxy.com for ghfast.top as a backup mirror)
+git clone https://gh-proxy.com/https://github.com/sandypoli-boop/sansheng-deskdash.git
+```
+
+## Updating
+
+How you upgrade depends on how you installed:
+
+- **Via the plugin marketplace**: `claude plugin marketplace update`, then `claude plugin update sansheng-deskdash`
+- **Via clone + symlink**: `git pull` in this repo (the symlink takes effect immediately — no reinstall)
+
+**Knowing there's a new version**: check the repo's [Releases](../../releases); click **Watch → Custom → Releases** at the top-right so GitHub notifies you. See [CHANGELOG](CHANGELOG.md) for what changed.
+
 ---
 
 ## Official module gallery
@@ -135,6 +153,45 @@ The gallery is driven single-source from `registry/registry.json`; run `python s
 - **Host**: native to Claude Code; a root `AGENTS.md` bridges other AGENTS.md-reading agent hosts
 
 ---
+
+## Companion article
+
+Being written; link to follow after publication.
+
+## About the author
+
+<p align="center">
+  <a href="https://sanshengai.top"><strong>🌐 sanshengai.top</strong></a> ·
+  <a href="https://namecard.xiaoyuzhoufm.com/nnl8x"><strong>🎧 Podcast</strong></a> ·
+  <a href="https://weibo.com/u/7546221967"><strong>Weibo</strong></a> ·
+  <a href="https://www.xiaohongshu.com/user/profile/5c716b6d000000001000f5c4"><strong>RED</strong></a> ·
+  <a href="mailto:sandypoli@gmail.com"><strong>✉️ Email</strong></a>
+</p>
+
+I'm **sansheng (叁笙)**. I create AI content and build AI tools -- my site [sanshengai.top](https://sanshengai.top) ships a daily AI morning brief, deep dives, and a pile of tools I built for my own workflow. This desktop dashboard came out of wanting the numbers I should watch today visible at a glance, forged in real daily use, then cleaned and open-sourced. Use it as-is, or fork it into your own.
+
+<p align="center">
+  <img src="assets/qrcode-gongzhonghao.png" alt="WeChat Official Account" width="200">
+  <br><sub>WeChat: 叁笙早安AI</sub>
+</p>
+
+## Credits & Dependencies
+
+### Credits
+
+- **[Rainmeter](https://www.rainmeter.net/)** -- the rendering foundation of this skill. Every "pinned to the wallpaper" capability comes from Rainmeter; this repo only generates its skin config (`.ini`/`.inc`) and does not redistribute Rainmeter itself.
+- **[Open-Meteo](https://open-meteo.com/)** -- the keyless default data source for the weather module (CC BY 4.0), which makes "weather with zero config" possible.
+
+### Runtime dependencies
+
+- **Windows** + **[Rainmeter](https://www.rainmeter.net/) 4.5+** ([GPLv2](https://github.com/rainmeter/rainmeter/blob/master/LICENSE); a standalone runtime you install yourself via `winget`, **not bundled** by this repo)
+- **Python >= 3.10** -- collectors are pure stdlib; optional packages are **not bundled, install-your-own**: `requests` ([Apache-2.0](https://github.com/psf/requests/blob/main/LICENSE)) / `Pillow` ([HPND](https://github.com/python-pillow/Pillow/blob/main/LICENSE)) / `tzdata` ([Apache-2.0](https://github.com/python/tzdata/blob/master/LICENSE), only for IANA timezone names)
+- **Optional**: `gh` (GitHub CLI, [MIT](https://github.com/cli/cli/blob/trunk/LICENSE), raises rate limits for the github module)
+- **Claude Code** (or any host that can execute SKILL.md / AGENTS.md)
+
+### License compatibility
+
+Distributed under MIT with **no vendored third-party code**. Rainmeter (GPLv2) is a standalone runtime the user installs; this repo only generates its config files and does not redistribute it — **no GPL contamination**. The optional Python packages are runtime dependencies installed by the user, all MIT-compatible.
 
 ## License
 
