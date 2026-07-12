@@ -7,8 +7,13 @@
 ![License](https://img.shields.io/badge/License-MIT-green) ![Platform](https://img.shields.io/badge/Platform-Windows-blue) ![Rainmeter](https://img.shields.io/badge/Rainmeter-4.5%2B-lightgrey) ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 
 <p align="center">
-  <img src="assets/board-preview.png" width="360" alt="Full board preview: clock & calendar + weather + todo">
-  <br><sub>A board pinned to your wallpaper: clock & calendar + weather + todo (on the wall in 60 seconds)</sub>
+  <img src="assets/board-desktop.jpg" width="720" alt="The board running on a real desktop, pinned to the wallpaper layer">
+  <br><sub>What it looks like once installed — one board pinned to the wallpaper layer, no browser, no popup</sub>
+</p>
+
+<p align="center">
+  <img src="assets/board-preview.png" width="300" alt="Board close-up: clock & calendar + weather + morning digest + social matrix + GitHub stars">
+  <br><sub>Close-up: eight kinds of info on one screen, refreshing itself</sub>
 </p>
 
 ---

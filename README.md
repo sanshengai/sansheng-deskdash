@@ -7,8 +7,13 @@
 ![License](https://img.shields.io/badge/License-MIT-green) ![Platform](https://img.shields.io/badge/Platform-Windows-blue) ![Rainmeter](https://img.shields.io/badge/Rainmeter-4.5%2B-lightgrey) ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 
 <p align="center">
-  <img src="assets/board-preview.png" width="360" alt="桌面看板整板预览:时钟日历 + 天气 + 待办">
-  <br><sub>一块贴在壁纸上的看板:时钟日历 + 天气 + 待办(60 秒即可上墙)</sub>
+  <img src="assets/board-desktop.jpg" width="720" alt="桌面看板装在真实桌面上的整体效果:一整块看板贴在壁纸层">
+  <br><sub>装上后的样子 —— 一整块看板直接贴在壁纸层,不占浏览器、不弹窗</sub>
+</p>
+
+<p align="center">
+  <img src="assets/board-preview.png" width="300" alt="桌面看板局部放大:时钟日历 + 天气 + 晨报链路 + 自媒体矩阵 + GitHub 星标">
+  <br><sub>局部放大:八类信息一屏收齐,数据自己刷新</sub>
 </p>
 
 ---
