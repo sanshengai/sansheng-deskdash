@@ -1,5 +1,6 @@
 # tests/test_doctor.py — doctor.py 单测:mock 掉系统探测接缝,验 JSON 结构、缺 Rainmeter
 # 判定、height_budget 计算、屏幕失败兜底、可选依赖不拖垮整体 ok。
+import json
 import os
 import sys
 
@@ -136,6 +137,52 @@ def test_optional_present(monkeypatch):
     assert rep["checks"]["tzdata"]["ok"] is True
     assert rep["checks"]["scheduled_task"]["ok"] is True
     assert "SomeTask" in rep["checks"]["scheduled_task"]["detail"]
+
+
+# —— 任务名从 lock 读(多板时别去查默认名报假阴性)——
+
+def _lock(tmp_path, **kv):
+    b = tmp_path / "brd"
+    b.mkdir(exist_ok=True)
+    (b / "modules.lock.json").write_text(json.dumps(kv), encoding="utf-8")
+    return str(b)
+
+
+def test_task_name_read_from_lock(monkeypatch, tmp_path):
+    """doctor 缺省应查 lock 里的 task_name,而非硬编默认名 ——
+    否则多板时会对着「SanshengDeskdash」报「未注册」,而真任务叫别的名字。"""
+    _all_green(monkeypatch)
+    seen = []
+    monkeypatch.setattr(doctor, "_task_registered", lambda name: seen.append(name) or True)
+    board = _lock(tmp_path, task_name="SanshengDeskdash-MyBoard", skin_name="MyBoard")
+    rep = doctor.build_report(board=board)
+    assert seen == ["SanshengDeskdash-MyBoard"]
+    assert "SanshengDeskdash-MyBoard" in rep["checks"]["scheduled_task"]["detail"]
+
+
+def test_explicit_task_name_beats_lock(monkeypatch, tmp_path):
+    _all_green(monkeypatch)
+    seen = []
+    monkeypatch.setattr(doctor, "_task_registered", lambda name: seen.append(name) or True)
+    board = _lock(tmp_path, task_name="FromLock")
+    doctor.build_report(board=board, task_name="Explicit")
+    assert seen == ["Explicit"]
+
+
+def test_task_name_falls_back_when_lock_missing_or_broken(monkeypatch, tmp_path):
+    """lock 缺失 / 坏 JSON / 无 task_name 字段 → 退默认名,不抛异常(体检器不能自己崩)。"""
+    _all_green(monkeypatch)
+    assert doctor.task_name_from_lock(None) is None
+    assert doctor.task_name_from_lock(str(tmp_path / "nope")) is None
+    b = tmp_path / "broken"
+    b.mkdir()
+    (b / "modules.lock.json").write_text("{ not json", encoding="utf-8")
+    assert doctor.task_name_from_lock(str(b)) is None
+    assert doctor.task_name_from_lock(_lock(tmp_path, skin_name="X")) is None   # 无 task_name 字段
+    seen = []
+    monkeypatch.setattr(doctor, "_task_registered", lambda name: seen.append(name) or True)
+    doctor.build_report(board=str(b))
+    assert seen == [doctor.DEFAULT_TASK_NAME]
 
 
 # —— board 检查 ——

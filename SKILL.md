@@ -37,11 +37,11 @@ description: 让 Agent 当你的桌面看板施工队 —— 说人话提需求,
 | 命令 | 签名 | 干什么 |
 |---|---|---|
 | 体检 | `python scripts/doctor.py [--board <board>] [--task-name <name>]` | 输出 JSON(`ok`/`height_budget`/`checks{python,platform,rainmeter,screen,gh,pillow,tzdata,scheduled_task,board}`)。退出码恒 0,**判定看 JSON 的 `ok`**。 |
-| 装配 | `python scripts/assemble.py --board <board> --size M [--budget <N>] [--modules a,b,c] [--out <path>]` | band.inc 累加拼整板 .ini,回写 `modules.lock.json`。缺 `--out` 打到 stdout;超预算 → 报错(含"哪个模块可裁")。 |
+| 装配 | `python scripts/assemble.py --board <board> --size M [--budget <N>] [--modules a,b,c] [--out <path>] [--skin-name <name>] [--task-name <name>]` | band.inc 累加拼整板 .ini,回写 `modules.lock.json`(含 `skin_name`/`task_name`,供部署与任务脚本缺省读取)。缺 `--out` 打到 stdout;超预算 → 报错(含"哪个模块可裁")。 |
 | 采集 | `python scripts/orchestrator.py --board <board> [--net-only] [--only a,b]` | 跑各模块采集器,写 `data.inc`/`health.json`。`--only` 强制跑指定模块(绕节流)。 |
 | 部署 | `powershell -ExecutionPolicy Bypass -File scripts/deploy_skin.ps1 -Board <board> -SkinName Deskdash [-SourceIni <path>] [-RainmeterExe <path>] [-BackupCount 5] [-NoRefresh]` | UTF-8→UTF-16 部署到 `Documents\Rainmeter\Skins\`,轮换 5 份备份,`!RefreshApp`。 |
-| 注册常驻 | `powershell -ExecutionPolicy Bypass -File scripts/install_task.ps1 -Board <board> [-TaskName SanshengDeskdash] [-Python <path>]` | 计划任务:登录后 5 分钟 + 每 2 小时跑 orchestrator。幂等。 |
-| 卸载 | `powershell -ExecutionPolicy Bypass -File scripts/uninstall.ps1 -Board <board> [-SkinName Deskdash] [-TaskName SanshengDeskdash] [-KeepData] [-Force]` | 反注册任务 + 删皮肤副本 + 删/留数据。**非交互无 `-Force` 只打印不删**。 |
+| 注册常驻 | `powershell -ExecutionPolicy Bypass -File scripts/install_task.ps1 -Board <board> [-TaskName <name>] [-Python <path>]` | 计划任务:登录后 5 分钟 + 每 2 小时跑 orchestrator。幂等(同板重装放行)。`-TaskName` 缺省读 lock 的 `task_name`。**同名任务若指向别的板 → 拒绝覆盖并报错**(防覆盖栏)。 |
+| 卸载 | `powershell -ExecutionPolicy Bypass -File scripts/uninstall.ps1 -Board <board> [-SkinName <name>] [-TaskName <name>] [-KeepData] [-Force]` | 反注册任务 + 删皮肤副本 + 删/留数据。`-SkinName`/`-TaskName` 均缺省读 lock。**非交互无 `-Force` 只打印不删**。 |
 | 平移 | `python scripts/shift_band.py <ini> <from_y> <dy> [--dry]` | 对成品补偿平移(只动数字字面量 Y=)。 |
 | 校验/造件 | `python scripts/validate_module.py <module_dir>` · `python scripts/new_module.py <id>` | VALIDATE 门 / 生成模块骨架(见 §2)。 |
 

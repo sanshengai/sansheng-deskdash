@@ -2,6 +2,16 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。对外版本号从 v0.1.0 起,与内部 git 提交脱钩。
 
+## 未发布
+
+### 修复
+
+- **多板互撞(静默数据丢失)**:第二块板执行 `install_task.ps1` 时,若不显式传 `-TaskName`,会因默认值硬编码为 `SanshengDeskdash` + `Register-ScheduledTask -Force` 而**直接覆盖第一块板的计划任务,且不报错** —— 第一块板从此永不刷新,看板停在旧数据上,用户无从察觉。`uninstall.ps1` 同款硬编码默认值(且不像 `-SkinName` 那样回落读 lock),导致**卸载 B 板会反注册掉 A 板的任务**。三处根治:
+  - `assemble.py` 新增 `task_name`,与既有 `skin_name` 同规格写进 `modules.lock.json`(lock 仍是单一真值);缺省按皮肤名推导 —— 默认皮肤保持 `SanshengDeskdash`(向后兼容,既有安装的任务名不漂移),其余皮肤为 `SanshengDeskdash-<皮肤名>`,使多板天然不撞。新增 `--task-name`。
+  - `install_task.ps1` / `uninstall.ps1` 各加 `Resolve-TaskName`(显式 > lock > 默认),与 `Resolve-SkinName` 同款模式。
+  - `install_task.ps1` 新增**防覆盖栏**:同名任务若指向别的板则拒绝执行并给出三条解法,不再静默 `-Force` 顶掉(幂等边界收紧为「同一块板重装」)。
+- **`doctor.py` 多板假阴性**:`--task-name` 缺省硬编码 `SanshengDeskdash`,多板时会对着不存在的默认名报「计划任务未注册」。改为缺省从 `--board` 的 lock 读 `task_name`(lock 缺失/坏 JSON/无该字段均安全退默认名,体检器不自崩)。
+
 ## v0.1.0 - 2026-07-11
 
 首个公开版本(P0「施工队可用」)。陌生用户装上 skill 说一句「帮我搭个桌面看板」,即可走完 体检 → 60 秒上墙 → 五问 → 装模块 / 现场造 → 常驻桌面 的完整链路。

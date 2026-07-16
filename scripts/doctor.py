@@ -340,8 +340,25 @@ def _check_board(board):
 #  组装报告
 # ============================================================
 
-def build_report(board=None, task_name=DEFAULT_TASK_NAME):
-    """跑全部检查,返回 {"ok", "checks", "height_budget"}。"""
+def task_name_from_lock(board):
+    """板的 modules.lock.json 里的 task_name(assemble 写入);读不到 → None。
+    与 install_task.ps1 / uninstall.ps1 的 Resolve-TaskName 同源,保证三方看的是同一个名字 ——
+    否则多板时 doctor 会去查默认名、报「未注册」这种假阴性。"""
+    if not board:
+        return None
+    try:
+        with open(os.path.join(board, "modules.lock.json"), "r", encoding="utf-8") as f:
+            v = json.load(f).get("task_name")
+        return str(v) if v else None
+    except (OSError, ValueError, AttributeError):
+        return None                       # lock 缺失/坏 JSON 不致命,退到默认名
+
+
+def build_report(board=None, task_name=None):
+    """跑全部检查,返回 {"ok", "checks", "height_budget"}。
+    task_name=None → 从 board 的 lock 读,再退 DEFAULT_TASK_NAME。"""
+    if not task_name:
+        task_name = task_name_from_lock(board) or DEFAULT_TASK_NAME
     checks = {}
     checks["python"] = _check_python()
     checks["platform"] = _check_platform()
@@ -366,8 +383,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="sansheng-deskdash 环境体检:输出 JSON 到 stdout(ok 字段为判定源)。")
     ap.add_argument("--board", default=None, help="板目录(检查是否存在 + 是否已 assemble)")
-    ap.add_argument("--task-name", default=DEFAULT_TASK_NAME,
-                    help="计划任务名(默认 %s)" % DEFAULT_TASK_NAME)
+    ap.add_argument("--task-name", default=None,
+                    help="计划任务名;缺省从 --board 的 modules.lock.json 读 task_name,"
+                         "再缺省 %s" % DEFAULT_TASK_NAME)
     args = ap.parse_args(argv)
 
     report = build_report(board=args.board, task_name=args.task_name)

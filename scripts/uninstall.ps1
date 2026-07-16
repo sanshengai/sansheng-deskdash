@@ -18,7 +18,8 @@
   的 skin_name 读,再缺省 "Deskdash"。
 
 .PARAMETER TaskName
-  要反注册的计划任务名(默认 SanshengDeskdash)。
+  要反注册的计划任务名。缺省从 modules.lock.json 的 task_name 读,再缺省 "SanshengDeskdash"。
+  ⚠ 缺省值曾硬编码为 "SanshengDeskdash"(不读 lock),导致卸载 B 板会反注册掉 A 板的任务。
 
 .PARAMETER KeepData
   保留板内用户数据(config.json / todos.json / state\ / health.json / data.inc 等);只删任务与皮肤副本。
@@ -34,7 +35,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$Board,
     [string]$SkinName,
-    [string]$TaskName = "SanshengDeskdash",
+    [string]$TaskName,
     [switch]$KeepData,
     [switch]$Force
 )
@@ -52,6 +53,20 @@ function Resolve-SkinName {
         } catch { }
     }
     return "Deskdash"
+}
+
+function Resolve-TaskName {
+    # 任务名:显式 > modules.lock.json 的 task_name > 默认。与 Resolve-SkinName 同款。
+    param([string]$name, [string]$board)
+    if ($name) { return $name }
+    $lock = Join-Path $board "modules.lock.json"
+    if (Test-Path -LiteralPath $lock) {
+        try {
+            $j = Get-Content -LiteralPath $lock -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($j.task_name) { return [string]$j.task_name }
+        } catch { }
+    }
+    return "SanshengDeskdash"
 }
 
 function Get-DataTargets {
@@ -89,6 +104,7 @@ function Remove-PathSafe {
 # —— 解析 ——
 $Board = [System.IO.Path]::GetFullPath($Board)
 $SkinName = Resolve-SkinName -name $SkinName -board $Board
+$TaskName = Resolve-TaskName -name $TaskName -board $Board
 $skinDir = Join-Path (Join-Path $env:USERPROFILE "Documents\Rainmeter\Skins") $SkinName
 
 $taskExists = [bool](Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue)

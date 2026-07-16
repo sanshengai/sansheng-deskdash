@@ -185,7 +185,21 @@ def _check_reserved_sections(mods):
                   % (first_mid, first_sec)))
 
 
-def assemble(board_dir, modules_lock, size="M", height_budget=None, skin_name="Deskdash"):
+DEFAULT_SKIN_NAME = "Deskdash"
+DEFAULT_TASK_NAME = "SanshengDeskdash"
+
+
+def derive_task_name(skin_name):
+    """皮肤名 → 计划任务名。默认皮肤保持老任务名(向后兼容,不让既有安装的任务名漂移);
+    其余皮肤带后缀,使多板天然不撞 —— 用户/agent 忘传 -TaskName 也不会 -Force 覆盖别人的任务。"""
+    s = str(skin_name or "").strip() or DEFAULT_SKIN_NAME
+    if s == DEFAULT_SKIN_NAME:
+        return DEFAULT_TASK_NAME
+    return "%s-%s" % (DEFAULT_TASK_NAME, s)
+
+
+def assemble(board_dir, modules_lock, size="M", height_budget=None,
+             skin_name=DEFAULT_SKIN_NAME, task_name=None):
     """装配整张皮肤 .ini。
 
     参数:
@@ -195,6 +209,8 @@ def assemble(board_dir, modules_lock, size="M", height_budget=None, skin_name="D
       height_budget int 或 None;给定且总高超预算 → 抛 AssembleError(含各模块高度与可裁模块)。
       skin_name     皮肤名,写进 modules.lock.json 供 deploy_skin.ps1 / uninstall.ps1 缺省读取
                     (两脚本不传 -SkinName 时从这里取,取不到才落到自身默认 "Deskdash")。
+      task_name     计划任务名,写进 modules.lock.json 供 install_task.ps1 / uninstall.ps1 /
+                    doctor.py 缺省读取。None → 由 skin_name 推导(见 derive_task_name)。
 
     返回 {"ini_text": <完整 .ini>, "height": <int 总高>, "lock": <回写的顺序 list>}。
     副作用:把 modules.lock.json 写到 board_dir。
@@ -253,6 +269,7 @@ def assemble(board_dir, modules_lock, size="M", height_budget=None, skin_name="D
         "version": 1,
         "generated_by": "scripts/assemble.py",
         "skin_name": skin_name,     # deploy_skin.ps1 / uninstall.ps1 不传 -SkinName 时读这里
+        "task_name": task_name or derive_task_name(skin_name),  # install_task/uninstall/doctor 同理
         "size": size,
         "height": total_h,
         "modules": list(modules_lock),
@@ -289,6 +306,10 @@ def main(argv=None):
     ap.add_argument("--skin-name", default=None,
                     help="皮肤名(写进 modules.lock.json 供部署脚本缺省读取);"
                          "缺省由 --out 的文件名推断,再缺省 Deskdash")
+    ap.add_argument("--task-name", default=None,
+                    help="计划任务名(写进 modules.lock.json 供 install_task/uninstall/doctor "
+                         "缺省读取);缺省由皮肤名推导(默认皮肤=SanshengDeskdash,"
+                         "其余=SanshengDeskdash-<皮肤名>,保证多板不撞)")
     args = ap.parse_args(argv)
 
     board_dir = os.path.abspath(args.board)
@@ -297,11 +318,11 @@ def main(argv=None):
         return 2
     # 皮肤名:显式 > --out 文件名(deploy 默认找 <Board>\<SkinName>.ini,故两者须同名)> 默认
     skin_name = args.skin_name or (
-        os.path.splitext(os.path.basename(args.out))[0] if args.out else "Deskdash")
+        os.path.splitext(os.path.basename(args.out))[0] if args.out else DEFAULT_SKIN_NAME)
     order = _resolve_order(board_dir, args.modules)
     try:
         res = assemble(board_dir, order, size=args.size, height_budget=args.budget,
-                       skin_name=skin_name)
+                       skin_name=skin_name, task_name=args.task_name)
     except (AssembleError, ContractError) as e:
         print(json.dumps(e.to_error() if isinstance(e, AssembleError)
                          else {"ok": False, "err": {"kind": "bug", "retryable": False,

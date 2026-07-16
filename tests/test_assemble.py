@@ -205,6 +205,45 @@ def test_lock_carries_skin_name(tmp_path):
     assert lock["skin_name"] == "MyBoard"
 
 
+def test_lock_carries_task_name(tmp_path):
+    """install_task.ps1 / uninstall.ps1 不传 -TaskName 时从 lock 读 task_name。
+    assemble 必须生产该字段,否则两脚本只剩自身默认 "SanshengDeskdash" ——
+    第二块板 install 会 -Force 覆盖第一块板的任务(第一块板从此静默不刷新),
+    uninstall 会反注册掉别人的任务。"""
+    board = _board(tmp_path)
+    assemble(board, ["demo-a"], size="M")                       # 默认皮肤名 → 默认任务名
+    lock = json.load(open(os.path.join(board, "modules.lock.json"), encoding="utf-8"))
+    assert lock["task_name"] == "SanshengDeskdash"
+
+
+def test_task_name_derives_from_skin_name(tmp_path):
+    """非默认皮肤名 → 任务名自动带后缀,使多板天然不撞(这是本 bug 的根治点:
+    用户/agent 忘传 -TaskName 也不会覆盖别人)。默认皮肤名保持老任务名不变(向后兼容,
+    不能让既有安装的任务名漂移)。"""
+    board = _board(tmp_path)
+    assemble(board, ["demo-a"], size="M", skin_name="MyBoard")
+    lock = json.load(open(os.path.join(board, "modules.lock.json"), encoding="utf-8"))
+    assert lock["task_name"] == "SanshengDeskdash-MyBoard"
+
+
+def test_explicit_task_name_wins(tmp_path):
+    """显式 task_name 优先于由 skin_name 推导。"""
+    board = _board(tmp_path)
+    assemble(board, ["demo-a"], size="M", skin_name="MyBoard", task_name="CustomTask")
+    lock = json.load(open(os.path.join(board, "modules.lock.json"), encoding="utf-8"))
+    assert lock["task_name"] == "CustomTask"
+
+
+def test_cli_task_name_from_skin(tmp_path):
+    """CLI 路径同样产出 task_name(--out 推皮肤名 → 推任务名)。"""
+    from assemble import main
+    board = _board(tmp_path)
+    out = os.path.join(board, "MyBoard.ini")
+    assert main(["--board", board, "--size", "M", "--out", out]) == 0
+    lock = json.load(open(os.path.join(board, "modules.lock.json"), encoding="utf-8"))
+    assert lock["task_name"] == "SanshengDeskdash-MyBoard"
+
+
 def test_cli_infers_skin_name_from_out(tmp_path):
     """CLI 的 --out 文件名即皮肤名(deploy 默认找 <Board>\\<SkinName>.ini,两者须同名)。"""
     from assemble import main
