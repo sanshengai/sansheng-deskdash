@@ -1,6 +1,6 @@
 ---
 name: sansheng-deskdash
-description: 让 Agent 当你的桌面看板施工队 —— 说人话提需求,它环境体检、现场写采集器、把数据贴壁纸常驻 Windows 桌面(Rainmeter 原生皮肤,非浏览器/Electron),坏了喊一声就自愈修好。Use when 用户想 搭桌面看板/搭个看板/桌面挂件/把天气待办服务器GitHub钉在桌面、加看板模块/看板加一块、改看板布局/调看板排版、看板坏了/修看板/看板不更新了、卸载看板/删看板,或 build a desktop dashboard / add a dashboard widget / fix my desk board / uninstall the board。仅 Windows;面向非程序员设计,程序员向下兼容。
+description: Use when 用户在 Windows 上搭建、修改、修复或卸载 Rainmeter 常驻桌面看板，涉及天气、待办、服务器或 GitHub 模块；触发词：桌面看板、桌面挂件、改布局、看板不更新、卸载看板。浏览器或 Electron 仪表盘不用此 Skill。
 ---
 
 # sansheng-deskdash
