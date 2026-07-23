@@ -10,6 +10,7 @@
 
 ### 修复
 
+- **每日重活测试不再受运行时刻影响**：测试时钟固定在当天中午，避免夜间运行时“加 2 小时”跨日造成假失败。
 - **多板互撞(静默数据丢失)**:第二块板执行 `install_task.ps1` 时,若不显式传 `-TaskName`,会因默认值硬编码为 `SanshengDeskdash` + `Register-ScheduledTask -Force` 而**直接覆盖第一块板的计划任务,且不报错** —— 第一块板从此永不刷新,看板停在旧数据上,用户无从察觉。`uninstall.ps1` 同款硬编码默认值(且不像 `-SkinName` 那样回落读 lock),导致**卸载 B 板会反注册掉 A 板的任务**。三处根治:
   - `assemble.py` 新增 `task_name`,与既有 `skin_name` 同规格写进 `modules.lock.json`(lock 仍是单一真值);缺省按皮肤名推导 —— 默认皮肤保持 `SanshengDeskdash`(向后兼容,既有安装的任务名不漂移),其余皮肤为 `SanshengDeskdash-<皮肤名>`,使多板天然不撞。新增 `--task-name`。
   - `install_task.ps1` / `uninstall.ps1` 各加 `Resolve-TaskName`(显式 > lock > 默认),与 `Resolve-SkinName` 同款模式。

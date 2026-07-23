@@ -217,7 +217,8 @@ def test_daily_heavy_once_per_day(tmp_path):
     board = str(tmp_path)
     _mod(board, "hv", "Hv", _ok_src(1), mode="daily_heavy")
     _lock(board, ["hv"])
-    t0 = local_now()
+    # 固定在当天中午，避免测试于 22:00 后运行时「+2 小时」跨日，误把次日重跑判成失败。
+    t0 = local_now().replace(hour=12, minute=0, second=0, microsecond=0)
 
     r1 = orch.run(board, now=t0)
     assert r1["ran"] == ["hv"] and r1["outputs"]["Hv"]["Temp"] == 1
