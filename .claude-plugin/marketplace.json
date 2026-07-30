@@ -9,7 +9,7 @@
     {
       "name": "sansheng-deskdash",
       "description": "Agent-built native Windows desktop dashboard: say what you want to watch, the agent interviews you, writes read-only collectors for any data source, assembles a Rainmeter board pinned to your wallpaper, and repairs it when modules break.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "source": "./",
       "author": {
         "name": "叁笙 (sansheng)",
