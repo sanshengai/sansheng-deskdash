@@ -34,7 +34,7 @@
 
 ```bash
 # 1. 拉仓
-git clone https://github.com/sandypoli-boop/sansheng-deskdash.git
+git clone https://github.com/sanshengai/sansheng-deskdash.git
 
 # 2. 装成 skill(软链到 ~/.claude/skills;Windows PowerShell,无需管理员)
 #    ⚠ 就在 clone 所在目录执行(仓的父目录,别先 cd 进仓),否则 -Target 会指错
@@ -48,7 +48,7 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\sansheng-desk
 
 Agent 会自动:环境体检(缺 Rainmeter 提示 `winget install Rainmeter.Rainmeter`)→ 先把时钟钉上墙(**首次失败率设计为零**)→ 问你五个问题(全留空 = 全默认)→ 装模块或现场造 → 常驻刷新。
 
-> 也可用插件市场安装:`claude plugin marketplace add sandypoli-boop/sansheng-deskdash` 然后 `claude plugin install sansheng-deskdash`。
+> 也可用插件市场安装:`claude plugin marketplace add sanshengai/sansheng-deskdash` 然后 `claude plugin install sansheng-deskdash`。
 
 **要求**:Windows · Rainmeter 4.5+ · Python 3.10+(标准库即可)· 可选 `gh`(GitHub 模块提限流)、`Pillow`(日历配图)。
 
@@ -58,7 +58,7 @@ GitHub 直连不畅时,给 clone 地址前面加一层公共镜像即可(下载�
 
 ```bash
 # 加速 clone(把 gh-proxy.com 换成 ghfast.top 即备用镜像)
-git clone https://gh-proxy.com/https://github.com/sandypoli-boop/sansheng-deskdash.git
+git clone https://gh-proxy.com/https://github.com/sanshengai/sansheng-deskdash.git
 ```
 
 插件市场方式暂无稳定国内镜像;网络不畅时用上面的加速 clone + 软链。

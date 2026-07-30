@@ -34,7 +34,7 @@ Designed for **non-programmers** (describe it in plain words; never touch Rainme
 
 ```bash
 # 1. Clone
-git clone https://github.com/sandypoli-boop/sansheng-deskdash.git
+git clone https://github.com/sanshengai/sansheng-deskdash.git
 
 # 2. Install as a skill (symlink into ~/.claude/skills; Windows PowerShell, no admin needed)
 #    ⚠ Run this from the directory you cloned INTO (the repo's parent), not inside the repo,
@@ -48,7 +48,7 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\sansheng-desk
 
 The agent runs an environment check (prompts `winget install Rainmeter.Rainmeter` if missing) → pins a clock to the wall first (**first-run failure rate designed to be zero**) → asks five questions (leave all blank = all defaults) → installs modules or builds one on the spot → keeps it refreshing.
 
-> Or via the plugin marketplace: `claude plugin marketplace add sandypoli-boop/sansheng-deskdash` then `claude plugin install sansheng-deskdash`.
+> Or via the plugin marketplace: `claude plugin marketplace add sanshengai/sansheng-deskdash` then `claude plugin install sansheng-deskdash`.
 
 **Requirements**: Windows · Rainmeter 4.5+ · Python 3.10+ (stdlib only) · optional `gh` (GitHub rate limits), `Pillow` (calendar image).
 
@@ -58,7 +58,7 @@ If GitHub is slow to reach directly, prefix the clone URL with a public mirror (
 
 ```bash
 # accelerated clone (swap gh-proxy.com for ghfast.top as a backup mirror)
-git clone https://gh-proxy.com/https://github.com/sandypoli-boop/sansheng-deskdash.git
+git clone https://gh-proxy.com/https://github.com/sanshengai/sansheng-deskdash.git
 ```
 
 ## Updating
