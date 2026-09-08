@@ -162,9 +162,35 @@ python scripts/validate_module.py <id目录>  # VALIDATE 门:校验 widget.json 
 - **中文只走 `#变量#`**(经 `data.inc` UTF-16 注入),**不进 Lua/SetOption**,band 段内绝不内联中文字面量(GBK 乱码,见 `references/encoding.md`)。
 - **collector 自包含内联**:模块要能整目录拷走独立跑,**不 import 仓内 `scripts/lib`**;需要的小工具(如温度曲线)内联复制。
 - **stdout 只打一行 JSON**,用 `sys.stdout.buffer.write(json...encode("utf-8"))`,**不用 `print`**(避免平台编码把中文打乱)。
+- **线形 `Shape` 必须显式 `| StrokeWidth 0`**:Rainmeter 的 Shape 默认描边是「1px 纯黑」,一条 1px 高的分隔线会渲染成 3px、正中间 `#000000` 的黑带。判据是取像素,不是肉眼(见 `references/rainmeter-drawing.md §7.1`)。
+- **宽度会变的文本用 `StringAlign=CenterCenter`**:Rainmeter 量不到文字实宽,左对齐时文本一长就会压住旁边按估算摆的元素(见 `§7.3`)。
 - **collector 网络调用须自带超时**(`urlopen(..., timeout=)` 等),**调外部命令须自限**(如 `ping -n/-w` 或 `-c/-W`,别裸调)+ 叠 `subprocess.run(timeout=)` 硬杀——否则留下挂死的孤儿/孙进程拖垮整轮采集(见 `references/data-sources.md §5`)。
 
-细节:`references/rainmeter-drawing.md`(贝塞尔/InlineSetting)、`references/layout.md`(带区/原点锚定/平移)、`references/interaction.md`(InputText 只认 Enter / 双击防抖)。
+### 2.8 可选:二级弹层(点开看详情)——默认不做
+
+看板的默认形态是**纯展示**:数据画在带区上,用户只看不点。"点某一块弹出小窗看明细"是可选的进阶形态。
+
+**先问一句、给单一推荐,别默认给上。** 对用户的话:"要不要点开看详情?不点开的话这块就只显示前 4 条,更省事也更不容易坏。"
+
+| 情形 | 结论 |
+|---|---|
+| 每块 3~4 行以内、一屏看得完 | **不做**。信息全摆在带区上,点都不用点 |
+| 用户只早上瞥一眼、不操作 | **不做** |
+| 只是想"更像个 app" | **不做**。这是形态偏好不是需求,代价见下 |
+| 某块条目天然多于能显示的行数(20 条待办只显示 4 条) | 可做:弹层给完整列表 |
+| 需要看某条详情(留言全文、报错堆栈) | 可做:弹层给这一条的明细 |
+| 需要就地操作(标记已读、勾完成) | 可做,但先想想带区上的单击热区够不够 |
+
+代价不是"多一个功能",是多一套 Rainmeter **会持久化**的状态(哪个开着、盖在谁上面、什么时候关),出问题的方式很隐蔽。真要做,四条硬规则一条都不能省(全文与证据见 `references/popups.md`):
+
+1. 🔴 **"产出文件"和"打开界面"必须是两条命令。** Rainmeter 把"哪些 config 开着"写进 `Rainmeter.ini` 的 `Active=1`,而部署必发的 `!RefreshApp` 会**重新加载每一个 Active=1 的 config**。所以任何一次"顺手激活"都会在之后**每一次部署里复活,用户关掉也没用**。给弹层的数据文件一个只落盘、零 bang 的生成形态,部署链路只准调它。
+2. 🔴 **部署收尾对每个弹层显式 `!DeactivateConfig`。** 只做到"不主动打开"不够——上一次遗留的 `Active=1` 会被这一轮 `!RefreshApp` 拉回来。部署是后台维护,跑完桌面上不该多出任何一个窗。
+3. 🔴 **弹层的 `ZPos` 是 `0`。** 不是 `-2`(那会把它按到看板底下,用户点开的窗直接沉下去),也不是 `1`/`2`(那是霸屏,一直压在用户正在用的软件前面)。弹层只需要比看板高,而看板在桌面层,普通窗口天然就在它上面。刷过看板后隔约 0.45s 再补一次层级收尾,否则会被刷新本身盖掉。
+4. 🔴 **测试不许替用户点。** 被测软件装在本机时,"发命令"这层没打桩就是真的发出去了——曾经跑一次测试就在用户桌面上弹一个窗,而测试全绿,因为副作用不在任何断言里。在测试根 `conftest.py` 放 autouse 全局桩,**换掉模块里那个 `subprocess` 名字,不是改 `subprocess.run` 属性**(后者改的是全局模块对象,别的用例会当场炸)。
+
+排障时记一条:**用户说"关不掉 / 又回来了",那是持久化状态的特征,不是手滑的特征**——先去 `Rainmeter.ini` 看 `Active`,别在触发点上找谁点了它。
+
+细节:`references/rainmeter-drawing.md`(贝塞尔/InlineSetting/三个默认值坑)、`references/layout.md`(带区/原点锚定/平移)、`references/interaction.md`(InputText 只认 Enter / 双击防抖)、`references/popups.md`(可选弹层:激活态持久化/层级/关闭终点)。
 
 ---
 
@@ -264,6 +290,7 @@ powershell -ExecutionPolicy Bypass -File scripts/uninstall.ps1 -Board <board> -S
 - 皮肤禁 `!Execute` 任意命令、禁远程加载。
 - **依赖 `deps ⊆ [requests, Pillow]`,stdlib-only 为默认**;禁 collector 内 `pip install`;白名单外的包一律不许。
 - 密钥只进 gitignore 的 `config.json`,**绝不进代码 / 日志 / 错误消息**。
+- **部署与测试不许替用户操作界面**:装配/采集/部署链路上的任何一步都不许 `!ActivateConfig` 一个弹层;测试根必须有 autouse 全局桩挡住向 Rainmeter 发命令。理由与写法见 `references/popups.md §1 / §4`——这条一破,用户桌面上会多出一个**他关不掉**的窗。
 
 ---
 
@@ -287,4 +314,4 @@ powershell -ExecutionPolicy Bypass -File scripts/uninstall.ps1 -Board <board> -S
 
 ## references 索引(细节都在这)
 
-`references/encoding.md`(GBK 桥/UTF-16/中文 bat) · `references/rainmeter-drawing.md`(贝塞尔/InlineSetting/锚点) · `references/layout.md`(带区/原点锚定/平移/高度预算) · `references/interaction.md`(InputText 只认 Enter/双击防抖) · `references/data-sources.md`(彩云 3 天上限/代理 fake-IP 定位漂移/TLS 测延迟) · `references/security.md`(禁止项 + 审阅点全表) · `references/contribution.md`(回流 PR 流程) · `references/troubleshoot.md`(排障决策树) · `references/backends.md`(多后端概念稿)。
+`references/encoding.md`(GBK 桥/UTF-16/中文 bat) · `references/rainmeter-drawing.md`(贝塞尔/InlineSetting/锚点) · `references/layout.md`(带区/原点锚定/平移/高度预算) · `references/interaction.md`(InputText 只认 Enter/双击防抖) · `references/data-sources.md`(彩云 3 天上限/代理 fake-IP 定位漂移/TLS 测延迟) · `references/security.md`(禁止项 + 审阅点全表) · `references/contribution.md`(回流 PR 流程) · `references/troubleshoot.md`(排障决策树) · `references/backends.md`(多后端概念稿) · `references/popups.md`(可选二级弹层:要不要做的判据、激活态持久化、层级三条、测试不碰真机)。
