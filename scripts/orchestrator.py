@@ -403,6 +403,17 @@ def run(board_dir, net_only=False, only=None, now=None):
     data_inc = os.path.join(board_dir, "data.inc")
     atomic_write(data_inc, to_inc(safe_outputs), encoding="utf-16")
 
+    # 同一份数据再落一份 data.json(UTF-8)供 macOS 原生面板读。
+    # 🔴 两份必须出自同一个 safe_outputs —— 各算各的迟早会出现「两个平台上的数不一样」,
+    # 而这种不一致没有任何症状,只能靠肉眼比对发现。Windows 侧完全不受这一行影响。
+    data_json = os.path.join(board_dir, "data.json")
+    _write_json(data_json, {"generated_at": health["generated_at"],
+                            "modules": safe_outputs,
+                            "health": {mid: {"stale": bool(m.get("fail_streak", 0) >= 3),
+                                             "fail_streak": m.get("fail_streak", 0),
+                                             "last_ok": m.get("last_ok")}
+                                       for mid, m in hmods.items()}})
+
     errors = ["%s: %s: %s" % (mid, m["last_err"]["kind"], m["last_err"]["hint_for_agent"])
               for mid, m in hmods.items() if m.get("last_err")]
     events.append("%s net_only=%s ran=[%s] skipped=[%s] errors=%d"
@@ -412,7 +423,8 @@ def run(board_dir, net_only=False, only=None, now=None):
 
     return {"generated_at": health["generated_at"], "net_only": eff_net_only,
             "outputs": outputs, "health": health, "ran": ran, "skipped": skipped,
-            "errors": errors, "events": events, "data_inc": data_inc}
+            "errors": errors, "events": events, "data_inc": data_inc,
+            "data_json": data_json}
 
 
 def _load_lock(board_dir):
@@ -456,7 +468,7 @@ def main(argv=None):
                                                "hint_for_agent": str(e)}},
                          ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
-    print("data.inc 已更新:%s(跑 %d,跳过 %d,错误 %d)"
+    print("data.inc / data.json 已更新:%s(跑 %d,跳过 %d,错误 %d)"
           % (res["data_inc"], len(res["ran"]), len(res["skipped"]), len(res["errors"])))
     return 0
 

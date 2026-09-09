@@ -4,6 +4,31 @@
 
 ## [未发布]
 
+### 新增
+
+- **macOS 支持（双平台并列，不是替换）**。Rainmeter 只有 Windows 版，macOS 上没有等价物，所以换的是渲染层不是整套：
+  - **采集层零改动**：模块的 `collector.py` 不动、调度不动。`orchestrator.py` 每轮在写 `data.inc`（UTF-16，给 Rainmeter）的同时多写一份 `data.json`（UTF-8，给 macOS 面板）；🔴 **两份出自同一份 outputs**，各算各的迟早会「两个平台上的数不一样」，而这种不一致没有任何症状、只能靠肉眼比对发现，所以用例里钉死了同源断言。
+  - **原生 SwiftUI 面板模板** `templates/macos-panel/Panel.swift`：按模块 prefix 自动分块渲染，**新装模块不改代码就能上墙**；块的顺序与标题是两张表（`ORDER` / `TITLES`），要给某个模块做专属排版才动 `customBlock()`。
+  - **一条命令上墙** `scripts/deploy_macos.sh`：编译 + 本机自签 + 启动。**不需要 Xcode、不需要 Apple 开发者账号**——自己在自己机器上编出来的 App 没有隔离标记，Gatekeeper 不拦。实测常驻内存 18~22 MB、CPU 0.0%。
+  - **`references/macos.md`**：形态取舍（原生面板 / WidgetKit 小组件 / 网页贴壁纸）与全部平台硬限制，每条都是真机实测。
+- **SKILL 路由改成「先认平台，再认意图」**，并在 §3 改布局、§5 卸载两处分平台给法。macOS 定时明确用 `launchd` 而不是 `cron`：笔记本合盖时 cron 会直接跳过错过的时间点，launchd 会在唤醒后补跑。
+
+### macOS 上最容易白干的几件事（全部实测，细节见 `references/macos.md`）
+
+- 🔴 **窗口钉在桌面层就永远收不到鼠标**——窗口服务器不往那一层投递事件。画得出来，但永远点不了、拖不动。要可拖可点必须用**桌面图标层**（桌面图标本身能点能拖，就是这层收事件的证据）。
+- 🔴 **无边框窗口默认不能成为 key 窗口**，不重写 `canBecomeKey` / `canBecomeMain` 照样收不到事件。这条和层级是两件事，缺任一条都表现为「点不动」。
+- 🔴 **只装 Command Line Tools 时用不了 `@State` 等 SwiftUI 宏**（实现插件 `SwiftUIMacros` 只随 Xcode 提供，`swiftc` 直接报错）。状态放进 `ObservableObject` 即可绕过，`@Published` / `@ObservedObject` 不是宏、不受影响。
+- 🔴 **拖动要交给窗口服务器**（`performDrag(with:)`），别自己逐帧 `setFrameOrigin`——后者每帧过一遍 SwiftUI 布局，手感明显发涩。`isMovableByWindowBackground` 对 SwiftUI 内容不可靠，显式关掉。
+- 🔴 **同层里谁在前谁收事件**：系统桌面小组件也在这一层，被它压到后面之后面板会彻底没反应。移动完重排，外加 5 秒心跳兜底。
+- 🔴 **可点元素必须自己说明「我能点」**：悬停变手型 + 行尾静态角标。只挂 `onTapGesture` 而没有任何提示，用户不敢点，等于不能点。
+- 🔴 **增量为 0 也要显示 `+0`**：只在 >0 时才画的话，「查过了是 0」和「压根没这个字段」在屏幕上一模一样。三态要分得开：`+1` 绿 / `+0` 灰 / `—` 红。
+- 🔴 **位置持久化要夹回屏内**：面板高度随内容变，照搬旧坐标会有一截掉出屏幕。
+- 🔴 **验收不能靠截图**：SSH 起的进程拿不到「屏幕录制」权限，且不该让别的会话代跑截图（那是绕过权限）。改用 `CGWindowListCopyWindowInfo` 直接问窗口服务器，无需任何权限就能证明「窗口在屏上、在哪一层、多大」。
+
+### 修复
+
+- `scripts/deploy_macos.sh` 里变量名后紧跟中文标点会在某些 locale 下被 bash 当成变量名的一部分，`set -u` 报「未绑定的变量」。全部改为 `${VAR}`，并在原处注明。
+
 ## [0.3.0] -- 2026-09-09
 
 ### 新增

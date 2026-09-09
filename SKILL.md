@@ -1,11 +1,11 @@
 ---
 name: sansheng-deskdash
-description: Use when 用户在 Windows 上搭建、修改、修复或卸载 Rainmeter 常驻桌面看板，涉及天气、待办、服务器或 GitHub 模块；触发词：桌面看板、桌面挂件、改布局、看板不更新、卸载看板。浏览器或 Electron 仪表盘不用此 Skill。
+description: Use when 用户在 Windows 或 macOS 上搭建、修改、修复或卸载常驻桌面看板，涉及天气、待办、服务器或 GitHub 模块；Windows 走 Rainmeter 皮肤，macOS 走原生 SwiftUI 面板，采集层两平台共用；触发词：桌面看板、桌面挂件、改布局、看板不更新、卸载看板、Mac 看板。浏览器或 Electron 仪表盘不用此 Skill。
 ---
 
 # sansheng-deskdash
 
-**一句话**:你说想看什么,我把它变成常驻桌面的一块——原生贴壁纸,不占浏览器,数据自己刷新,坏了自己会喊修。
+**一句话**:你说想看什么,我把它变成常驻桌面的一块——原生贴壁纸,不占浏览器,数据自己刷新,坏了自己会喊修。**Windows 和 macOS 都能上墙,采集层同一套。**
 
 **三楔子**(差异化,别当普通 dashboard):
 1. **原生贴壁纸常驻**:Rainmeter 皮肤直接钉在壁纸上,不是浏览器标签、不是 Electron 大窗;关机重开自动在。
@@ -14,7 +14,35 @@ description: Use when 用户在 Windows 上搭建、修改、修复或卸载 Rai
 
 ---
 
-## 路由:先认意图,再进对应工作流
+## 路由:先认平台,再认意图
+
+### 第 0 步 · 认平台(每次都做,别猜)
+
+```
+python scripts/doctor.py     # JSON 里的 checks.platform 就是判据
+```
+
+| 平台 | 渲染层 | 部署 | 定时 |
+|---|---|---|---|
+| **Windows** | Rainmeter 皮肤(`.ini` + band.inc,UTF-16) | `scripts/deploy_skin.ps1` | 计划任务 `install_task.ps1` |
+| **macOS** | 原生 SwiftUI 面板(`templates/macos-panel/Panel.swift`) | `scripts/deploy_macos.sh` | `launchd`(**不是 cron**,见下) |
+
+**采集层两平台完全一样**:模块的 `collector.py` 不动、`orchestrator.py` 不动。
+orchestrator 每轮同时写 `data.inc`(UTF-16,给 Rainmeter)和 `data.json`(UTF-8,给 macOS 面板),
+**两份出自同一份 outputs** —— 不会出现两个平台上的数不一样。
+
+所以「换平台」换的只是渲染与部署两步,§2 现场造模块、§4 排障、§6 三审阅点、§7 禁止项**全部照旧**。
+
+macOS 的形态选择(原生面板 / 系统小组件 / 网页贴壁纸)、平台硬限制与全部踩坑见
+`references/macos.md` —— **动手前必读那一篇**,里面每条都是真机实测,不是推演。
+
+> 🔴 **macOS 上最容易白干的三件事**(细节在 `references/macos.md`):
+> ① 窗口钉在**桌面层就永远收不到鼠标**(平台硬限制),要可拖可点必须用桌面图标层;
+> ② **无边框窗口默认不能成为 key 窗口**,不重写 `canBecomeKey` 照样点不动;
+> ③ 只有 Command Line Tools 时**用不了 `@State` 等 SwiftUI 宏**(实现插件只随 Xcode 提供),
+>    状态要放进 `ObservableObject`。
+
+### 第 1 步 · 认意图
 
 | 用户意图信号 | 工作流 | 跳到 |
 |---|---|---|
@@ -31,7 +59,9 @@ description: Use when 用户在 Windows 上搭建、修改、修复或卸载 Rai
 - **board(板)** = 一个工作目录 `<board>`,里面每个子目录是一个模块(从本 skill 的 `modules/<id>/` 拷入),外加装配/运行生成的 `modules.lock.json`、`data.inc`、`health.json`、`state/`、`logs/`。**你新建它、把选中的模块拷进去**;它是用户数据,不在本仓内。
 - `<board>` **默认建在 `%USERPROFILE%\Deskdash`**(用户没指定就用它,别每次即兴选路径);用绝对路径传给脚本。
 - 脚本路径相对 skill 根目录;示例板名 `Deskdash`、示例主机 `example.com`、GitHub 用户 `octocat`。
-- ps1 一律 `powershell -ExecutionPolicy Bypass -File <ps1> ...` 调用(不改系统策略、不下载)。
+- ps1 一律 `powershell -ExecutionPolicy Bypass -File <ps1> ...` 调用(不改系统策略、不下载);macOS 侧对应的是 `bash scripts/deploy_macos.sh`。
+- 🔴 macOS 定时用 **`launchd`,不要 `cron`**:笔记本合盖睡眠时 cron 会**直接跳过**错过的时间点,
+  launchd 的 `StartInterval` 会在**唤醒后补跑** —— 这是「醒来就是新数据」和「醒来还是昨晚的数据」的区别。
 - 仓内源文件 UTF-8;皮肤部署副本与 `data.inc`/`todos.inc` 的 UTF-16 由脚本自动转,**你不手动碰编码**。
 
 | 命令 | 签名 | 干什么 |
@@ -42,7 +72,8 @@ description: Use when 用户在 Windows 上搭建、修改、修复或卸载 Rai
 | 部署 | `powershell -ExecutionPolicy Bypass -File scripts/deploy_skin.ps1 -Board <board> -SkinName Deskdash [-SourceIni <path>] [-RainmeterExe <path>] [-BackupCount 5] [-NoRefresh]` | UTF-8→UTF-16 部署到 `Documents\Rainmeter\Skins\`,轮换 5 份备份,`!RefreshApp`。 |
 | 注册常驻 | `powershell -ExecutionPolicy Bypass -File scripts/install_task.ps1 -Board <board> [-TaskName <name>] [-Python <path>]` | 计划任务:登录后 5 分钟 + 每 2 小时跑 orchestrator。幂等(同板重装放行)。`-TaskName` 缺省读 lock 的 `task_name`。**同名任务若指向别的板 → 拒绝覆盖并报错**(防覆盖栏)。 |
 | 卸载 | `powershell -ExecutionPolicy Bypass -File scripts/uninstall.ps1 -Board <board> [-SkinName <name>] [-TaskName <name>] [-KeepData] [-Force]` | 反注册任务 + 删皮肤副本 + 删/留数据。`-SkinName`/`-TaskName` 均缺省读 lock。**非交互无 `-Force` 只打印不删**。 |
-| 平移 | `python scripts/shift_band.py <ini> <from_y> <dy> [--dry]` | 对成品补偿平移(只动数字字面量 Y=)。 |
+| 平移 | `python scripts/shift_band.py <ini> <from_y> <dy> [--dry]` | 对成品补偿平移(只动数字字面量 Y=)。**Windows 专用**。 |
+| 上墙(macOS) | `bash scripts/deploy_macos.sh --board <board> [--level icon\|desktop\|back] [--source <Panel.swift>]` | 编译 + 本机自签 + 上墙。**不需要 Xcode、不需要 Apple 账号**。拖不动就换 `--level back`。停掉:`--stop`。 |
 | 校验/造件 | `python scripts/validate_module.py <module_dir>` · `python scripts/new_module.py <id>` | VALIDATE 门 / 生成模块骨架(见 §2)。 |
 
 **首次激活新皮肤**:deploy 只写文件 + `!RefreshApp`;**新皮肤第一次上墙必须先 `!ActivateConfig`**(否则文件在但看板不出现):
@@ -196,6 +227,21 @@ python scripts/validate_module.py <id目录>  # VALIDATE 门:校验 widget.json 
 
 ## §3 工作流③:改布局
 
+### macOS(原生面板)
+
+改 `templates/macos-panel/Panel.swift`,然后 `bash scripts/deploy_macos.sh --board <board>` 重新上墙。
+不需要平移工具 —— SwiftUI 自己算布局,没有 Y 值要补偿。三个常改的地方:
+
+- **块的顺序 / 标题** → 文件顶部的 `ORDER` 和 `TITLES` 两张表,不用动渲染代码。
+- **某个模块要专属排版** → `customBlock()` 里加一个 `case <prefix>`,并把 prefix 加进 `hasCustom`;
+  没有专属分支的模块自动走 `GenericBlock` 兜底(新装模块**不改代码就能上墙**)。
+- **配色 / 宽度** → 文件上方的 `c*` 常量与 `PANEL_W`。
+
+🔴 改完必须真机看一眼排版 —— 窗口在不在、在哪一层可以用 `CGWindowListCopyWindowInfo` 程序化验,
+但**好不好看只能人眼判断**,别拿「进程在跑」当验收通过。
+
+### Windows(Rainmeter 皮肤)
+
 **铁律:禁止手改成品 .ini 的 Y 值。** 两条正道:
 
 1. **改顺序 / 增删模块** → 改 `modules.lock.json` 的 `modules` 数组(或直接 `assemble --modules a,c,b`)重装配:
@@ -258,6 +304,10 @@ powershell -ExecutionPolicy Bypass -File scripts/uninstall.ps1 -Board <board> -S
 ```
 向用户说清:"会取消开机自动刷新、从桌面移除这块皮肤;你的待办和配置<删掉 / 保留(加了 -KeepData)>。"
 
+macOS 侧:`bash scripts/deploy_macos.sh --board <board> --stop` 停掉面板,再删 `<board>/<名>.app`
+与 `~/Library/LaunchAgents/` 下的 plist(`launchctl bootout gui/$(id -u)/<label>` 先卸载)。
+用户数据(config/todos/state/health/data.json)同样默认保留,删之前问一句。
+
 ---
 
 ## §6 三审阅点(半自动的信任闸,不可跳)
@@ -314,4 +364,4 @@ powershell -ExecutionPolicy Bypass -File scripts/uninstall.ps1 -Board <board> -S
 
 ## references 索引(细节都在这)
 
-`references/encoding.md`(GBK 桥/UTF-16/中文 bat) · `references/rainmeter-drawing.md`(贝塞尔/InlineSetting/锚点) · `references/layout.md`(带区/原点锚定/平移/高度预算) · `references/interaction.md`(InputText 只认 Enter/双击防抖) · `references/data-sources.md`(彩云 3 天上限/代理 fake-IP 定位漂移/TLS 测延迟) · `references/security.md`(禁止项 + 审阅点全表) · `references/contribution.md`(回流 PR 流程) · `references/troubleshoot.md`(排障决策树) · `references/backends.md`(多后端概念稿) · `references/popups.md`(可选二级弹层:要不要做的判据、激活态持久化、层级三条、测试不碰真机)。
+`references/encoding.md`(GBK 桥/UTF-16/中文 bat) · `references/rainmeter-drawing.md`(贝塞尔/InlineSetting/锚点) · `references/layout.md`(带区/原点锚定/平移/高度预算) · `references/interaction.md`(InputText 只认 Enter/双击防抖) · `references/data-sources.md`(彩云 3 天上限/代理 fake-IP 定位漂移/TLS 测延迟) · `references/security.md`(禁止项 + 审阅点全表) · `references/contribution.md`(回流 PR 流程) · `references/troubleshoot.md`(排障决策树) · `references/backends.md`(多后端概念稿) · `references/popups.md`(可选二级弹层:要不要做的判据、激活态持久化、层级三条、测试不碰真机) · `references/macos.md`(**macOS 必读**:三种形态取舍、不装 Xcode 的能力边界、窗口层级与鼠标事件、拖动移交、可点提示、launchd、实测内存)。

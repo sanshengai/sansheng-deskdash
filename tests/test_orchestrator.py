@@ -8,6 +8,7 @@
 #   缺 lock 报错 / 坏 widget 只记不炸 / CLI main。
 import json
 import os
+import io
 import sys
 from datetime import timedelta
 
@@ -426,8 +427,21 @@ def test_cli_main_ok(tmp_path, capsys):
     _lock(board, ["demo"])
     rc = orch.main(["--board", board])
     assert rc == 0
-    assert "data.inc 已更新" in capsys.readouterr().out
+    assert "已更新" in capsys.readouterr().out
     assert os.path.isfile(os.path.join(board, "data.inc"))
+    # 🔴 两个平台的数据必须同源:data.inc 给 Rainmeter(UTF-16),data.json 给 macOS 原生面板,
+    # 都由同一份 safe_outputs 落盘。各算各的迟早会「两个平台上的数不一样」,而这种不一致
+    # 没有任何症状、只能靠肉眼比对发现,所以在这里钉死。
+    dj = os.path.join(board, "data.json")
+    assert os.path.isfile(dj), "macOS 面板要读的 data.json 没写出来"
+    payload = json.loads(io.open(dj, encoding="utf-8").read())
+    assert payload["modules"], "data.json 里没有模块输出"
+    inc = io.open(os.path.join(board, "data.inc"), encoding="utf-16").read()
+    for prefix, kv in payload["modules"].items():
+        for k, v in kv.items():
+            if isinstance(v, bool):
+                continue                      # to_inc 把 bool 转成 1/0,两边表示不同是有意的
+            assert ("%s%s=" % (prefix, k)) in inc, "data.json 有 %s%s 而 data.inc 没有" % (prefix, k)
 
 
 def test_cli_missing_board(capsys):
