@@ -99,17 +99,57 @@ def render_cal(now, week_start="monday", out_path=_CAL_PNG):
     return os.path.abspath(out_path)
 
 
+def _font_candidates(bold=False):
+    """返回平台自带/常见 CJK 字体；TTC 的下标明确选简体字形。"""
+    if sys.platform == "win32":
+        root = os.path.join(os.environ.get("WINDIR") or os.environ.get("SystemRoot")
+                            or "C:/Windows", "Fonts")
+        names = ["msyhbd.ttc", "msyh.ttc", "simhei.ttf"] if bold else ["msyh.ttc", "simhei.ttf"]
+        return [(os.path.join(root, name), 0) for name in names]
+    if sys.platform == "darwin":
+        weight = "Medium" if bold else "Light"
+        return [
+            ("/System/Library/Fonts/STHeiti %s.ttc" % weight, 1),
+            ("/System/Library/Fonts/PingFang.ttc", 0),
+            ("/System/Library/Fonts/Supplemental/Songti.ttc", 0),
+            ("/Library/Fonts/Arial Unicode.ttf", 0),
+        ]
+    weight = "Bold" if bold else "Regular"
+    return [
+        ("/usr/share/fonts/opentype/noto/NotoSansCJK-%s.ttc" % weight, 2),
+        ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", 2),
+        ("/usr/share/fonts/truetype/wqy/wqy-microhei.ttc", 0),
+        ("/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc", 0),
+    ]
+
+
+def _has_calendar_glyphs(font):
+    """拒绝空字形和缺字方框，不能把无法读的日历标成已就绪。"""
+    missing = font.getmask("\uffff")
+    missing_signature = (missing.size, bytes(missing))
+    for text in "年月一二三四五六日":
+        mask = font.getmask(text)
+        pixels = bytes(mask)
+        if not any(pixels) or (mask.size, pixels) == missing_signature:
+            return False
+    return True
+
+
 def _load_fonts():
-    """微软雅黑(Windows 自带);缺失 → PIL 默认位图字体兜底(不崩,只是丑)。"""
+    """按原有 36/22/30/30 字号加载中文字体；缺字时由 collect 隐藏日历。"""
     from PIL import ImageFont
-    try:
-        return (ImageFont.truetype("C:/Windows/Fonts/msyhbd.ttc", 36),
-                ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", 22),
-                ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", 30),
-                ImageFont.truetype("C:/Windows/Fonts/msyhbd.ttc", 30))
-    except (OSError, IOError):
-        d = ImageFont.load_default()
-        return d, d, d, d
+
+    def load(size, bold=False):
+        for path, index in _font_candidates(bold):
+            try:
+                font = ImageFont.truetype(path, size, index=index)
+                if _has_calendar_glyphs(font):
+                    return font
+            except (OSError, ValueError):
+                continue
+        raise OSError("No usable CJK font for calendar")
+
+    return load(36, True), load(22), load(30), load(30, True)
 
 
 def collect(cfg):
